@@ -21,8 +21,8 @@ export const trustClaims: TrustClaim[] = [
   },
   {
     id: 'no-network',
-    title: 'No network code beyond the IPC endpoint',
-    detail: 'The core and the UI talk to each other over an owner-only IPC endpoint: a Unix domain socket on Linux, a named pipe on Windows. In the cited core and UI sources, that endpoint is the only networking code: no TCP/UDP sockets and no HTTP client.',
+    title: 'No network code in the core or UI beyond the IPC endpoint',
+    detail: 'The core and the UI talk to each other over an IPC endpoint: a Unix domain socket on Linux, a named pipe on Windows. In the cited core and UI sources, that endpoint is the only networking code: no TCP/UDP sockets and no HTTP client.',
     verified: false,
     evidence: [
       { commit: C, path: 'core/src/endpoint_posix.cpp', lines: [481, 491], label: 'Linux: the only socket the core opens is AF_UNIX (endpoint_posix.cpp)' },
@@ -44,7 +44,7 @@ export const trustClaims: TrustClaim[] = [
   {
     id: 'least-privilege',
     title: 'Owner-only IPC endpoint',
-    detail: 'Only the user who started the core can open its IPC endpoint: the socket is mode 0600 on Linux, and the named pipe’s DACL grants only the creating user on Windows.',
+    detail: 'No other unprivileged user can open the core’s IPC endpoint: on Linux the socket is mode 0600 (owner only; root can still open it), and on Windows the named pipe’s DACL has a single entry, for the account that started the core.',
     verified: false,
     evidence: [
       { commit: C, path: 'core/src/endpoint_posix.cpp', lines: [493, 505], label: 'Linux socket bound under umask 0177, then set to mode 0600 (endpoint_posix.cpp)' },
