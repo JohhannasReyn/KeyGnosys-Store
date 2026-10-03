@@ -17,7 +17,8 @@ export default {
     const deps: HandlerDeps = {
       now: () => Date.now(),
       allow: async () => {
-        if (!env.RL) return true;
+        if (!env.RL) { console.log(JSON.stringify({ event: 'rl.missing' })); return true; }
+        if (!env.RL_KEY_SALT) console.log(JSON.stringify({ event: 'rl.unsalted' }));
         const key = await clientKey(req.headers.get('CF-Connecting-IP') ?? 'unknown', env.RL_KEY_SALT ?? '');
         return (await env.RL.limit({ key })).success;
       },
