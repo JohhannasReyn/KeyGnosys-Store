@@ -17,7 +17,7 @@ const CHECKSUM: Record<Platform, { shell: string; cmd: (file: string) => string 
   linux: { shell: 'terminal', cmd: (f) => `sha256sum ${f}` },
 };
 const verify = r
-  ? groupByPlatform(r).map((g) => ({ name: g.name, file: g.artifacts[0].file, ...CHECKSUM[g.platform] }))
+  ? groupByPlatform(r).map((g) => ({ platform: g.platform, name: g.name, file: g.artifacts[0].file, ...CHECKSUM[g.platform] }))
   : [];
 const GENERIC = '<downloaded-file>';
 // Hash values vary per build; the exact list is in the Content-Security-Policy response header.
@@ -36,16 +36,16 @@ const csp = buildCsp({ scriptHashes: ['sha256-…'], styleHashes: ['sha256-…']
         : <p>We're preparing evidence-linked claims for this section. Until they're published here, the best evidence is the source itself: <a href={`https://github.com/${site.repo}`} rel="noopener">read the source ↗</a>.</p>}
     </section>
 
-    <section id="verify">
+    <section id="verify" data-availability>
       <h2>Verify your download</h2>
       {!r && <p class="fine">These steps apply once the first release is published.</p>}
       <h3>1. Check the checksum</h3>
       <p>Compare the output with the SHA-256 listed on the <a href="/download/">download page</a>.</p>
       {verify.length ? verify.map((v) => (
-        <>
+        <div data-platform={v.platform}>
           <p>{v.name} ({v.shell}):</p>
           <pre><code>{v.cmd(v.file)}</code></pre>
-        </>
+        </div>
       )) : (
         <>
           <p>In a terminal:</p>
@@ -57,7 +57,7 @@ const csp = buildCsp({ scriptHashes: ['sha256-…'], styleHashes: ['sha256-…']
       <h3>2. Check where it was built</h3>
       <p>Each release file carries a build attestation. It proves the file was built by our public GitHub Actions workflow from the public source, not on someone's laptop. With the <a href="https://cli.github.com/" rel="noopener">GitHub CLI ↗</a>:</p>
       {verify.length
-        ? verify.map((v) => <pre><code>gh attestation verify {v.file} --repo {site.repo}</code></pre>)
+        ? verify.map((v) => <pre data-platform={v.platform}><code>gh attestation verify {v.file} --repo {site.repo}</code></pre>)
         : <pre><code>gh attestation verify {GENERIC} --repo {site.repo}</code></pre>}
     </section>
 
