@@ -7,6 +7,9 @@ const mail = `mailto:${site.contactAddress}`;
   <p class="form-banner" data-form-banner="send_failed" role="alert" tabindex="-1" hidden>
     We couldn't send this. Email <a href={mail}>{site.contactAddress}</a> directly; your message is still below so you can copy it.
   </p>
+  <p class="form-banner" data-form-banner="rate_limited" role="alert" tabindex="-1" hidden>
+    Too many attempts. Please wait a minute and try again — your message is still here.
+  </p>
   <p class="form-banner" data-form-banner="network" role="alert" tabindex="-1" hidden>
     Couldn't reach the server. Check your connection and try again, or email <a href={mail}>{site.contactAddress}</a>.
   </p>
