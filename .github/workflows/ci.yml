@@ -1,0 +1,30 @@
+name: CI
+on:
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+# References no secrets: safe for fork PRs (the read-only GITHUB_TOKEN is the only credential).
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - run: npx playwright test          # builds via build:e2e (fixtures + all optional sections)
+      - run: npm run typecheck
+      - run: npm run check:static
+      - run: npm run check:platforms
+      - run: npm run check:budget
+      - run: npm run check:lighthouse
+      - name: Live content check (read-only, fails on bad release data)
+        run: npm run fetch-content
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with: { name: playwright-report, path: playwright-report/ }

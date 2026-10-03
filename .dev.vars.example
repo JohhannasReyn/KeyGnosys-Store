@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `npm run preview` against real bindings. Never commit .dev.vars.
+CONTACT_TO=you@example.com
+RL_KEY_SALT=local-dev-salt
+BUTTONDOWN_API_KEY=

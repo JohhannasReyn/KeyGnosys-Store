@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import ClaimList from '../components/ClaimList.astro';
+import release from '../data/release.json';
+import { trustClaims } from '../data/trust-claims';
+import { publishableClaims } from '../lib/trust';
+import { groupByPlatform, type ValidatedRelease } from '../lib/releases';
+import type { Platform } from '../lib/platforms';
+import { site } from '../config/site';
+import { buildCsp } from '../security/headers';
+const r = release as ValidatedRelease | null;
+const { claims, warnings } = publishableClaims(trustClaims, r ? { commit: r.commit, version: r.version } : null);
+for (const w of warnings) console.warn(`[trust] ${w}`);
+// Only platforms with a real artifact in the release manifest are named (spec §1, truthful by construction).
+const CHECKSUM: Record<Platform, { shell: string; cmd: (file: string) => string }> = {
+  windows: { shell: 'PowerShell', cmd: (f) => `Get-FileHash .\\${f} -Algorithm SHA256` },
+  linux: { shell: 'terminal', cmd: (f) => `sha256sum ${f}` },
+};
+const verify = r
+  ? groupByPlatform(r).map((g) => ({ platform: g.platform, name: g.name, file: g.artifacts[0].file, ...CHECKSUM[g.platform] }))
+  : [];
+const GENERIC = '<downloaded-file>';
+// Hash values vary per build; the exact list is in the Content-Security-Policy response header.
+const csp = buildCsp({ scriptHashes: ['sha256-…'], styleHashes: ['sha256-…'], styleAttrHashes: ['sha256-…'] });
+---
+<Base title="Trust" description="How to verify KeyGnosys and this website for yourself.">
+  <div class="wrap page">
+    <p class="eyebrow">Trust</p>
+    <h1>Shown, not told.</h1>
+    <p class="lede">KeyGnosys sees every key you press. That's exactly why you shouldn't take our word for anything. Here's how to check for yourself.</p>
+
+    <section id="app">
+      <h2>What the app does, and doesn't</h2>
+      {claims.length
+        ? <ClaimList claims={claims} />
+        : <p>We're preparing evidence-linked claims for this section. Until they're published here, the best evidence is the source itself: <a href={`https://github.com/${site.repo}`} rel="noopener">read the source ↗</a>.</p>}
+    </section>
+
+    <section id="verify" data-availability>
+      <h2>Verify your download</h2>
+      {!r && <p class="fine">These steps apply once the first release is published.</p>}
+      <h3>1. Check the checksum</h3>
+      <p>Compare the output with the SHA-256 listed on the <a href="/download/">download page</a>.</p>
+      {verify.length ? verify.map((v) => (
+        <div data-platform={v.platform}>
+          <p>{v.name} ({v.shell}):</p>
+          <pre><code>{v.cmd(v.file)}</code></pre>
+        </div>
+      )) : (
+        <>
+          <p>In a terminal:</p>
+          <pre><code>sha256sum {GENERIC}</code></pre>
+          <p>Or in PowerShell:</p>
+          <pre><code>Get-FileHash .\{GENERIC} -Algorithm SHA256</code></pre>
+        </>
+      )}
+      <h3>2. Check where it was built</h3>
+      <p>Each release file carries a build attestation. It proves the file was built by our public GitHub Actions workflow from the public source, not on someone's laptop. With the <a href="https://cli.github.com/" rel="noopener">GitHub CLI ↗</a>:</p>
+      {verify.length
+        ? verify.map((v) => <pre data-platform={v.platform}><code>gh attestation verify {v.file} --repo {site.repo}</code></pre>)
+        : <pre><code>gh attestation verify {GENERIC} --repo {site.repo}</code></pre>}
+    </section>
+
+    <section id="website">
+      <h2>This website</h2>
+      <ul>
+        <li><strong>No cookies, no analytics, no tracking.</strong></li>
+        <li><strong>No third-party requests.</strong> Every script, font and image comes from keygnosys.com. A Content-Security-Policy header makes your browser refuse anything else; open your browser's developer tools (Network tab) to check.</li>
+        <li><strong>Forms go to our own server</strong>, which emails us your message and stores nothing. See <a href="/privacy/">privacy</a>.</li>
+        <li><strong>Open source and public builds.</strong> <a href={`https://github.com/${site.siteRepo}`} rel="noopener">Site source ↗</a> · <a href={`https://github.com/${site.siteRepo}/actions`} rel="noopener">every deploy's build log ↗</a></li>
+      </ul>
+      <p>The policy your browser enforces on this site:</p>
+      <pre><code>{csp}</code></pre>
+      <p class="fine">Each <code>sha256-…</code> stands for a hash computed at build time. The exact hashes are in the Content-Security-Policy response header of every page.</p>
+    </section>
+  </div>
+</Base>

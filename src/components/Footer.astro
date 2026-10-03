@@ -1,0 +1,19 @@
+---
+import { site } from '../config/site';
+import SubscribeForm from './SubscribeForm.astro';
+interface Props { subscribe?: boolean }
+const { subscribe = true } = Astro.props;
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="wrap">
+    {subscribe && site.newsletter && <SubscribeForm id="footer-subscribe" />}
+    <ul>
+      <li><a href="/configs/">Configs</a></li>
+      <li><a href="/privacy/">Privacy</a></li>
+      <li><a href="/releases.xml">Release feed</a></li>
+      <li><a href={`https://github.com/${site.siteRepo}`} rel="noopener">Source of this site ↗</a></li>
+    </ul>
+    <p>© {year} KeyGnosys · Free and open source (MIT) · No cookies, no analytics, no third-party requests.</p>
+  </div>
+</footer>
