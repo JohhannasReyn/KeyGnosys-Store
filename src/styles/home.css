@@ -50,11 +50,12 @@ body.immersive .ov { position: absolute; inset: 0; display: flex; flex-direction
   padding: 90px clamp(20px,5vw,40px) 120px; gap: 20px; border: 0; opacity: 0; transform: scale(0.985); transition: opacity .45s ease, transform .45s ease; }
 body.immersive .ov.show { opacity: 1; transform: none; pointer-events: auto; }
 body.immersive .hud { display: block; position: fixed; z-index: 30; pointer-events: none; }
-body.immersive .dots { display: flex; left: 0; right: 0; bottom: 26px; gap: 10px; justify-content: center; }
-body.immersive .dots button { pointer-events: auto; width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--ink-faint); background: transparent; cursor: pointer; transition: background .2s, transform .2s, border-color .2s; }
-body.immersive .dots button[aria-current="true"] { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
-body.immersive .scrollhint { left: 0; right: 0; bottom: 52px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: .08em; color: var(--ink-faint); transition: opacity .4s; }
+body.immersive .dots { display: flex; left: 0; right: 0; bottom: 20px; gap: 4px; justify-content: center; }
+body.immersive .dots button { pointer-events: auto; position: relative; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+body.immersive .dots button::before { content: ""; position: absolute; inset: 7.5px; border-radius: 50%; border: 1px solid var(--ink-faint); transition: background .2s, transform .2s, border-color .2s; }
+body.immersive .dots button[aria-current="true"]::before { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
+body.immersive .scrollhint { left: 0; right: 0; bottom: 52px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: .08em; color: var(--ink-dim); transition: opacity .4s; }
 body.immersive .scrollhint b { color: var(--ink-dim); font-weight: 500; }
-body.immersive .pagenum { top: 50%; right: clamp(14px,3vw,34px); transform: translateY(-50%); font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-faint); text-align: right; }
+body.immersive .pagenum { top: 50%; right: clamp(14px,3vw,34px); transform: translateY(-50%); font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-dim); text-align: right; }
 body.immersive .pagenum .cur { color: var(--accent); font-size: 26px; display: block; line-height: 1; }
 @media (prefers-reduced-motion: reduce) { body.immersive .ov { transition: none; } }
