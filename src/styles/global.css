@@ -57,3 +57,5 @@ pre { background: var(--surface); border: 1px solid var(--line); border-radius: 
 .cta-note { margin: 0; color: var(--ink-dim); }
 .cta-others { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--ink-dim); }
 .notes-text { white-space: pre-wrap; color: var(--ink-dim); }
+.btn-ghost { background: rgba(255,255,255,0.04); color: var(--ink); border-color: var(--line); }
+.btn-ghost:hover { background: rgba(255,255,255,0.09); color: var(--ink); }
