@@ -9,12 +9,17 @@ permissions:
 concurrency:
   group: preview-${{ github.ref }}
   cancel-in-progress: true
+# Explicit bash runs steps with -eo pipefail, so a failed wrangler command piped to tee fails the job.
+defaults:
+  run:
+    shell: bash
 jobs:
   preview:
     # Trusted contexts only: same-repo PRs or a manual dispatch. Fork PRs get build/test (ci.yml) and never
     # receive deployment secrets; Dependabot PRs are skipped. Production (keygnosys-site) is never touched here.
     if: >-
       github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name == 'workflow_dispatch' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-24.04
@@ -38,7 +43,8 @@ jobs:
           npx wrangler deploy --env preview 2>&1 | tee wrangler-deploy.log
           {
             echo "### Preview Worker"
-            grep -Eo 'https://[^ ]+\.workers\.dev[^ ]*' wrangler-deploy.log | sort -u | sed 's/^/- /' || echo '- (no workers.dev URL in wrangler output)'
+            urls="$(grep -Eo 'https://[^ ]+\.workers\.dev[^ ]*' wrangler-deploy.log | sort -u || true)"
+            if [ -n "$urls" ]; then printf '%s\n' "$urls" | sed 's/^/- /'; else echo '- (no workers.dev URL in wrangler output)'; fi
           } >> "$GITHUB_STEP_SUMMARY"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -49,7 +55,8 @@ jobs:
           npx wrangler versions upload --env preview --preview-alias "pr-${PR_NUMBER}" 2>&1 | tee wrangler-version.log
           {
             echo "### PR #${PR_NUMBER} preview"
-            grep -Eo 'https://[^ ]+\.workers\.dev[^ ]*' wrangler-version.log | sort -u | sed 's/^/- /' || echo '- (no workers.dev URL in wrangler output)'
+            urls="$(grep -Eo 'https://[^ ]+\.workers\.dev[^ ]*' wrangler-version.log | sort -u || true)"
+            if [ -n "$urls" ]; then printf '%s\n' "$urls" | sed 's/^/- /'; else echo '- (no workers.dev URL in wrangler output)'; fi
           } >> "$GITHUB_STEP_SUMMARY"
         env:
           PR_NUMBER: ${{ github.event.number }}
