@@ -52,3 +52,18 @@ test('shrinking below the immersive size falls back to the flat, scrollable page
   await page.mouse.wheel(0, 600);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
 });
+
+test('arrow keys on a focused control do not turn the page', async ({ page }) => {
+  await page.goto('/');
+  await page.mouse.move(10, 10);
+  await page.mouse.move(200, 200);
+  await expect(page.locator('body')).toHaveClass(/immersive/, { timeout: 20_000 });
+  await page.locator('#dots button').first().focus();
+  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(1500);
+  await expect(page.locator('#pgCur')).toHaveText('1');
+  // Control: the same keys on the page itself do turn it.
+  await page.locator('#dots button').first().blur();
+  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#pgCur')).not.toHaveText('1', { timeout: 10_000 });
+});

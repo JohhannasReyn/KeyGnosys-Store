@@ -208,8 +208,10 @@ export function start(): boolean {
     var dy = (touchY - e.touches[0].clientY) * 2.4; touchY = e.touches[0].clientY;
     accumulate(dy);
   }, { passive: true });
+  var INTERACTIVE = 'a, button, input, select, textarea, [contenteditable], [role="tab"]';
   window.addEventListener("keydown", function (e) {
-    if (!roomy.matches) return;
+    if (!roomy.matches || e.defaultPrevented) return;
+    if (e.target instanceof Element && e.target.closest(INTERACTIVE)) return;
     if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { step(SUB); }
     else if (e.key === "ArrowUp" || e.key === "PageUp") { step(-SUB); }
   });
