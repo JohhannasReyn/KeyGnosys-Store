@@ -7,6 +7,8 @@ const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader', '-
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
   await page.goto(server.url + '/');
+  await page.mouse.move(10, 10);
+  await page.mouse.move(200, 200);
   await page.waitForSelector('body.immersive', { timeout: 20_000 });
   await page.waitForTimeout(1500);
   // Wheel nine tics into the first key cutscene: the card has condensed away and the golden key is shown alone.

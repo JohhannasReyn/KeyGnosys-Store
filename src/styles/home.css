@@ -39,16 +39,16 @@
 
 /* ---------- immersive (added by keyboard-scene.ts) ---------- */
 .home #gl, .home #flash, .home .hud { display: none; }
-body.immersive { height: 100vh; overflow: hidden; }
-body.immersive .site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 40; max-width: none; }
-body.immersive .site-footer, body.immersive .hero-static { display: none; }
+body.immersive, html.immersive-pending body.home { height: 100vh; overflow: hidden; }
+body.immersive .site-nav, html.immersive-pending body.home .site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 40; max-width: none; }
+body.immersive .site-footer, body.immersive .hero-static, html.immersive-pending body.home .site-footer, html.immersive-pending body.home .hero-static { display: none; }
 body.immersive #gl { display: block; position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; }
 body.immersive #flash { display: block; position: fixed; inset: 0; z-index: 15; pointer-events: none; opacity: 0;
   background: radial-gradient(circle at 50% 46%, rgba(255,241,208,0.95), rgba(242,180,65,0.55) 38%, rgba(242,180,65,0) 68%); }
-body.immersive #overlays { position: fixed; inset: 0; z-index: 20; pointer-events: none; }
-body.immersive .ov { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+body.immersive #overlays, html.immersive-pending body.home #overlays { position: fixed; inset: 0; z-index: 20; pointer-events: none; }
+body.immersive .ov, html.immersive-pending body.home .ov { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 90px clamp(20px,5vw,40px) 120px; gap: 20px; border: 0; opacity: 0; transform: scale(0.985); transition: opacity .45s ease, transform .45s ease; }
-body.immersive .ov.show { opacity: 1; transform: none; pointer-events: auto; }
+body.immersive .ov.show, html.immersive-pending body.home .ov[data-page="0"] { opacity: 1; transform: none; pointer-events: auto; }
 body.immersive .hud { display: block; position: fixed; z-index: 30; pointer-events: none; }
 body.immersive .dots { display: flex; left: 0; right: 0; bottom: 20px; gap: 4px; justify-content: center; }
 body.immersive .dots button { pointer-events: auto; position: relative; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
@@ -58,4 +58,4 @@ body.immersive .scrollhint { left: 0; right: 0; bottom: 52px; text-align: center
 body.immersive .scrollhint b { color: var(--ink-dim); font-weight: 500; }
 body.immersive .pagenum { top: 50%; right: clamp(14px,3vw,34px); transform: translateY(-50%); font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-dim); text-align: right; }
 body.immersive .pagenum .cur { color: var(--accent); font-size: 26px; display: block; line-height: 1; }
-@media (prefers-reduced-motion: reduce) { body.immersive .ov { transition: none; } }
+@media (prefers-reduced-motion: reduce) { body.immersive .ov, html.immersive-pending body.home .ov { transition: none; } }

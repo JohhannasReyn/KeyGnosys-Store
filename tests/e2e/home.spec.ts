@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 
 test('3D scene engages and hidden overlays are inert', async ({ page }) => {
   await page.goto('/');
+  await page.mouse.move(10, 10);
+  await page.mouse.move(200, 200);
   await expect(page.locator('body')).toHaveClass(/immersive/, { timeout: 20_000 });
   await expect(page.locator('#gl')).toBeVisible();
   await expect(page.locator('.ov[data-page="1"]')).toHaveAttribute('inert', '');

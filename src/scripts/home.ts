@@ -8,13 +8,21 @@ function webglAvailable(): boolean {
 }
 
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const htmlEl = document.documentElement;
 
 if (!reduce && webglAvailable()) {
+  const flat = () => htmlEl.classList.remove('immersive-pending');
   const go = () => {
-    // A visitor who has already started reading the flat page keeps it.
-    if (window.scrollY > 100) return;
-    import('./keyboard-scene').then((m) => m.start()).catch(() => { /* stay flat */ });
+    // A visitor who has already started reading the flat page keeps it (only when not pre-rendered immersive).
+    if (!htmlEl.classList.contains('immersive-pending') && window.scrollY > 100) return;
+    import('./keyboard-scene')
+      .then((m) => { m.start(); flat(); })
+      .catch(flat);
   };
-  if ('requestIdleCallback' in window) window.requestIdleCallback(go, { timeout: 2000 });
-  else setTimeout(go, 200);
+  const events = ['pointermove', 'wheel', 'touchstart', 'keydown'] as const;
+  const onFirst = () => {
+    for (const e of events) window.removeEventListener(e, onFirst);
+    go();
+  };
+  for (const e of events) window.addEventListener(e, onFirst, { passive: true, once: true });
 }
