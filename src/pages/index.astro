@@ -13,7 +13,7 @@ import hero from '../assets/keyboard-hero.png';
 const r = release as ValidatedRelease | null;
 const { claims } = publishableClaims(trustClaims, r ? { commit: r.commit, version: r.version } : null);
 ---
-<Base title="KeyGnosys" description="The shortcuts you keep meaning to learn, already on the keys. A free, open-source, app-aware keyboard overlay for Windows and Linux." bodyClass="home">
+<Base title="KeyGnosys" description="The shortcuts you keep meaning to learn, already on the keys. A free, open-source, app-aware keyboard overlay." bodyClass="home">
   <script slot="head" is:inline>
     try {
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {

@@ -4,13 +4,21 @@ import ClaimList from '../components/ClaimList.astro';
 import release from '../data/release.json';
 import { trustClaims } from '../data/trust-claims';
 import { publishableClaims } from '../lib/trust';
-import type { ValidatedRelease } from '../lib/releases';
+import { groupByPlatform, type ValidatedRelease } from '../lib/releases';
+import type { Platform } from '../lib/platforms';
 import { site } from '../config/site';
 const r = release as ValidatedRelease | null;
 const { claims, warnings } = publishableClaims(trustClaims, r ? { commit: r.commit, version: r.version } : null);
 for (const w of warnings) console.warn(`[trust] ${w}`);
-const winFile = r?.artifacts.find((a) => a.primary && a.platform === 'windows')?.file ?? 'KeyGnosys-<version>-windows-x64-setup.exe';
-const linuxFile = r?.artifacts.find((a) => a.primary && a.platform === 'linux')?.file ?? 'KeyGnosys-<version>-linux-x64.AppImage';
+// Only platforms with a real artifact in the release manifest are named (spec §1, truthful by construction).
+const CHECKSUM: Record<Platform, { shell: string; cmd: (file: string) => string }> = {
+  windows: { shell: 'PowerShell', cmd: (f) => `Get-FileHash .\\${f} -Algorithm SHA256` },
+  linux: { shell: 'terminal', cmd: (f) => `sha256sum ${f}` },
+};
+const verify = r
+  ? groupByPlatform(r).map((g) => ({ name: g.name, file: g.artifacts[0].file, ...CHECKSUM[g.platform] }))
+  : [];
+const GENERIC = '<downloaded-file>';
 ---
 <Base title="Trust" description="How to verify KeyGnosys and this website for yourself.">
   <div class="wrap page">
@@ -30,13 +38,24 @@ const linuxFile = r?.artifacts.find((a) => a.primary && a.platform === 'linux')?
       {!r && <p class="fine">These steps apply once the first release is published.</p>}
       <h3>1. Check the checksum</h3>
       <p>Compare the output with the SHA-256 listed on the <a href="/download/">download page</a>.</p>
-      <p>Windows (PowerShell):</p>
-      <pre><code>Get-FileHash .\{winFile} -Algorithm SHA256</code></pre>
-      <p>Linux:</p>
-      <pre><code>sha256sum {linuxFile}</code></pre>
+      {verify.length ? verify.map((v) => (
+        <>
+          <p>{v.name} ({v.shell}):</p>
+          <pre><code>{v.cmd(v.file)}</code></pre>
+        </>
+      )) : (
+        <>
+          <p>In a terminal:</p>
+          <pre><code>sha256sum {GENERIC}</code></pre>
+          <p>Or in PowerShell:</p>
+          <pre><code>Get-FileHash .\{GENERIC} -Algorithm SHA256</code></pre>
+        </>
+      )}
       <h3>2. Check where it was built</h3>
       <p>Each release file carries a build attestation. It proves the file was built by our public GitHub Actions workflow from the public source, not on someone's laptop. With the <a href="https://cli.github.com/" rel="noopener">GitHub CLI ↗</a>:</p>
-      <pre><code>gh attestation verify {winFile} --repo {site.repo}</code></pre>
+      {verify.length
+        ? verify.map((v) => <pre><code>gh attestation verify {v.file} --repo {site.repo}</code></pre>)
+        : <pre><code>gh attestation verify {GENERIC} --repo {site.repo}</code></pre>}
     </section>
 
     <section id="website">
