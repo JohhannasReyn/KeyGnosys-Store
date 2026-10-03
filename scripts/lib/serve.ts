@@ -11,8 +11,17 @@ export async function serve(): Promise<{ url: string; stop(): Promise<void> }> {
   return {
     url,
     stop: async () => {
-      if (process.platform === 'win32') spawn('taskkill', ['/pid', String(child.pid), '/T', '/F']);
-      else child.kill('SIGTERM');
+      const exited = new Promise<void>((resolve) => {
+        if (child.exitCode !== null || child.signalCode !== null) return resolve();
+        child.once('exit', () => resolve());
+      });
+      if (process.platform === 'win32') {
+        // Kill the whole tree (shell + npx + astro) and wait for taskkill to finish.
+        await new Promise<void>((resolve) => spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' }).once('exit', () => resolve()));
+      } else {
+        child.kill('SIGTERM');
+      }
+      await exited;
     },
   };
 }
