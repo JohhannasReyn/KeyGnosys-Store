@@ -33,11 +33,37 @@ describe('imageRefs', () => {
   it('rejects images outside docs/images', () => {
     expect(() => imageRefs('![x](../SPEC.png)', 'docs/guide/x.md')).toThrow(/outside docs\/images/);
   });
+  it('resolves reference-style image definitions', () => {
+    const md = '[id]: ../images/logo.png\n\n![use][id]';
+    expect(imageRefs(md, 'docs/guide/x.md')).toEqual(['docs/images/logo.png']);
+  });
+  it('resolves unquoted html src attributes', () => {
+    expect(imageRefs('<img src=../images/a.png>', 'docs/guide/x.md')).toEqual(['docs/images/a.png']);
+  });
+  it('rejects reference-style external definitions', () => {
+    expect(() => imageRefs('[id]: https://cdn.example/logo.png\n\n![use][id]', 'docs/guide/x.md')).toThrow(DocsError);
+  });
+  it('throws DocsError on malformed % sequence in URL', () => {
+    expect(() => imageRefs('![x](../images/bad%ZZ.png)', 'docs/guide/x.md')).toThrow(DocsError);
+  });
 });
 
 describe('assertSafe', () => {
-  it.each(['<script>x</script>', '<img src="a" onerror="x">', '<iframe src="/x">', '[a](javascript:alert(1))'])(
-    'rejects %s', (s) => expect(() => assertSafe(s, 'docs/guide/x.md')).toThrow(DocsError));
+  it.each([
+    '<script>x</script>',
+    '<img src="a" onerror="x">',
+    '<svg/onload=alert(1)>',
+    '<img/src=x/onerror=y>',
+    '<iframe src="/x">',
+    '<object data="/x">',
+    '<embed src="/x">',
+    '<base href="/x">',
+    '<meta http-equiv="refresh">',
+    '<form action="/x">',
+    '[a](javascript:alert(1))',
+    '[a](vbscript:x)',
+    '[a](javascript&#58;alert(1))',
+  ])('rejects %s', (s) => expect(() => assertSafe(s, 'docs/guide/x.md')).toThrow(DocsError));
   it('accepts plain markdown', () => expect(() => assertSafe('# Hi\n\nOnline docs are nice.', 'docs/guide/x.md')).not.toThrow());
 });
 
