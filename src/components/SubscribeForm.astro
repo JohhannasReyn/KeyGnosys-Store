@@ -1,0 +1,21 @@
+---
+import { site } from '../config/site';
+interface Props { id?: string; heading?: string }
+const { id = 'subscribe', heading = 'Get notified of new releases' } = Astro.props;
+---
+<form class="subscribe-form" method="post" action="/api/subscribe" novalidate data-enhance data-timestamped>
+  <p class="form-banner" data-form-banner="network" role="alert" hidden>Couldn't reach the server. Try again, or email <a href={`mailto:${site.contactAddress}`}>{site.contactAddress}</a>.</p>
+  <label for={`${id}-email`}>{heading}</label>
+  <div class="row">
+    <input id={`${id}-email`} name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby={`${id}-email-err`} />
+    <button class="btn btn-primary" type="submit">Subscribe</button>
+  </div>
+  <p class="field-error" id={`${id}-email-err`} data-error-for="email" hidden></p>
+  <div class="hp" aria-hidden="true"><label>Leave this empty <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+  <input type="hidden" name="t" value="" />
+  <p class="fine">Double opt-in, no tracking, unsubscribe anytime. Prefer no email? <a href="/releases.xml">Use the release feed</a>.</p>
+</form>
+<script>
+  import '../scripts/form-timestamp';
+  import '../scripts/enhance-forms';
+</script>
