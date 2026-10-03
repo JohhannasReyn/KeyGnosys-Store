@@ -4,7 +4,8 @@ interface Props { id?: string; heading?: string }
 const { id = 'subscribe', heading = 'Get notified of new releases' } = Astro.props;
 ---
 <form class="subscribe-form" method="post" action="/api/subscribe" novalidate data-enhance data-timestamped>
-  <p class="form-banner" data-form-banner="network" role="alert" hidden>Couldn't reach the server. Try again, or email <a href={`mailto:${site.contactAddress}`}>{site.contactAddress}</a>.</p>
+  <p class="form-banner" data-form-banner="send_failed" role="alert" tabindex="-1" hidden>Something went wrong. Try again, or email <a href={`mailto:${site.contactAddress}`}>{site.contactAddress}</a>.</p>
+  <p class="form-banner" data-form-banner="network" role="alert" tabindex="-1" hidden>Couldn't reach the server. Try again, or email <a href={`mailto:${site.contactAddress}`}>{site.contactAddress}</a>.</p>
   <label for={`${id}-email`}>{heading}</label>
   <div class="row">
     <input id={`${id}-email`} name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby={`${id}-email-err`} />
