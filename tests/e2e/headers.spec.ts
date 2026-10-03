@@ -13,11 +13,16 @@ function check(headers: Record<string, string>) {
 /** Astro inlines small scripts, so fall back to a stylesheet or any /_astro/ asset URL in the page. */
 async function hashedAsset(page: Page): Promise<string> {
   await page.goto('/');
-  const asset =
-    (await page.locator('script[src^="/_astro/"]').first().getAttribute('src').catch(() => null)) ??
-    (await page.locator('link[rel="stylesheet"][href^="/_astro/"]').first().getAttribute('href').catch(() => null)) ??
-    (await page.content()).match(/\/_astro\/[^"'\s)]+/)?.[0] ??
-    null;
+  let asset: string | null = null;
+  for (const [selector, attr] of [
+    ['script[src^="/_astro/"]', 'src'],
+    ['link[rel="stylesheet"][href^="/_astro/"]', 'href'],
+    ['link[rel="modulepreload"][href^="/_astro/"]', 'href'],
+  ] as const) {
+    const loc = page.locator(selector);
+    if ((await loc.count()) > 0) { asset = await loc.first().getAttribute(attr); if (asset) break; }
+  }
+  asset ??= (await page.content()).match(/(?:src|href)="(\/_astro\/[^"]+)"/)?.[1] ?? null;
   expect(asset, 'an /_astro/ asset must be present on /').toBeTruthy();
   return asset!;
 }
