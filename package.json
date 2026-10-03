@@ -18,6 +18,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check:static": "tsx scripts/check-static.ts",
+    "check:platforms": "tsx scripts/check-platforms.ts",
     "check:budget": "tsx scripts/check-budget.ts",
     "check:lighthouse": "tsx scripts/lighthouse.ts",
     "typecheck": "astro check && tsc -p worker --noEmit"

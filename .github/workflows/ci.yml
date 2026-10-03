@@ -18,6 +18,7 @@ jobs:
       - run: npx playwright test          # builds via build:e2e (fixtures + all optional sections)
       - run: npm run typecheck
       - run: npm run check:static
+      - run: npm run check:platforms
       - run: npm run check:budget
       - run: npm run check:lighthouse
       - name: Live content check (read-only, fails on bad release data)
