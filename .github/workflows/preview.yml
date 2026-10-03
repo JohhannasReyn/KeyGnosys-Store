@@ -1,25 +1,57 @@
 name: Preview
-on: pull_request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  # Manual runs on a feature branch. GitHub only lets users with write access dispatch a workflow.
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: preview-${{ github.event.number }}
+  group: preview-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   preview:
-    # Trusted contexts only: fork PRs get build/test (ci.yml) and never receive deployment or provider secrets.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # Trusted contexts only: same-repo PRs or a manual dispatch. Fork PRs get build/test (ci.yml) and never
+    # receive deployment secrets; Dependabot PRs are skipped. Production (keygnosys-site) is never touched here.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'workflow_dispatch' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with: { node-version-file: .nvmrc, cache: npm }
       - run: npm ci
-      - run: npm run build
+      - name: Build from live release data
+        run: npm run build
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      # Separate preview Worker: no email binding, no provider secrets, sandboxed forms (spec §6.2).
-      - run: npx wrangler versions upload --env preview --preview-alias pr-${{ github.event.number }}
+      - name: Scan the build for third-party resources
+        run: npm run check:static
+      - name: Name only platforms the release manifest ships
+        run: npm run check:platforms
+      # Separate preview Worker (keygnosys-site-preview): no email binding, no provider secrets,
+      # sandboxed forms (spec §6.2). Stable URL: https://keygnosys-site-preview.<subdomain>.workers.dev
+      - name: Deploy the preview Worker
+        run: |
+          npx wrangler deploy --env preview 2>&1 | tee wrangler-deploy.log
+          {
+            echo "### Preview Worker"
+            grep -Eo 'https://[^ ]+\.workers\.dev[^ ]*' wrangler-deploy.log | sort -u | sed 's/^/- /' || echo '- (no workers.dev URL in wrangler output)'
+          } >> "$GITHUB_STEP_SUMMARY"
         env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Upload a per-PR preview version
+        if: github.event_name == 'pull_request'
+        run: |
+          npx wrangler versions upload --env preview --preview-alias "pr-${PR_NUMBER}" 2>&1 | tee wrangler-version.log
+          {
+            echo "### PR #${PR_NUMBER} preview"
+            grep -Eo 'https://[^ ]+\.workers\.dev[^ ]*' wrangler-version.log | sort -u | sed 's/^/- /' || echo '- (no workers.dev URL in wrangler output)'
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          PR_NUMBER: ${{ github.event.number }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

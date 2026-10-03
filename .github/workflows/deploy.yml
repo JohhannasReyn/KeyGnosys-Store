@@ -15,6 +15,9 @@ jobs:
     uses: ./.github/workflows/ci.yml
   deploy:
     needs: ci
+    # Production deploys stay off until the owner sets the repo variable PRODUCTION_DEPLOY_ENABLED=true,
+    # and only ever run from main (a manual dispatch on another branch is skipped).
+    if: vars.PRODUCTION_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     environment: production
     steps:
