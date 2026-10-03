@@ -1,0 +1,20 @@
+---
+import status from '../data/content-status.json';
+import { navItems, site, type ContentStatus } from '../config/site';
+const items = navItems(site, status as ContentStatus);
+const path = Astro.url.pathname;
+---
+<header class="wrap site-nav">
+  <a class="brand" href="/"><span class="glyph" aria-hidden="true">Kg</span>KeyGnosys</a>
+  <nav aria-label="Main">
+    <ul>
+      {items.map((i) => (
+        <li>
+          {i.external
+            ? <a href={i.href} rel="noopener">{i.label} <span aria-hidden="true">↗</span></a>
+            : <a href={i.href} aria-current={path.startsWith(i.href) ? 'page' : undefined}>{i.label}</a>}
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>

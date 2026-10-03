@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config/site';
+const CONFIGS_PATH = 'data';
+const browse = `https://github.com/${site.repo}/tree/main/${CONFIGS_PATH}`;
+---
+<Base title="Configs" description="Free community configs for KeyGnosys.">
+  <div class="wrap page">
+    <p class="eyebrow">Configs</p>
+    <h1>A config catalog is coming.</h1>
+    <p class="lede">Every KeyGnosys config is free, reviewable and versioned in the open. Until the catalog arrives, browse them on GitHub.</p>
+    <p><a class="btn btn-primary" href={browse} rel="noopener">Browse configs on GitHub ↗</a></p>
+    <h2>Submit a config via pull request</h2>
+    <ol>
+      <li>Fork <a href={`https://github.com/${site.repo}`} rel="noopener">{site.repo}</a>.</li>
+      <li>Add your config under <code>{CONFIGS_PATH}/</code>, following the existing files as a template.</li>
+      <li>Open a pull request describing the app and version it targets. Every submission is reviewed in public.</li>
+    </ol>
+  </div>
+</Base>

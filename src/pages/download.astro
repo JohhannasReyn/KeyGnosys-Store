@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import AssetTable from '../components/AssetTable.astro';
+import DownloadCta from '../components/DownloadCta.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
+import release from '../data/release.json';
+import type { ValidatedRelease } from '../lib/releases';
+import { formatDate } from '../lib/format';
+import { site } from '../config/site';
+const r = release as ValidatedRelease | null;
+---
+<Base title="Download" description="Download KeyGnosys. Free and open source." footerSubscribe={false}>
+  <div class="wrap page" data-availability>
+    <p class="eyebrow">Download</p>
+    {r ? (
+      <>
+        <h1>KeyGnosys {r.version}</h1>
+        <p class="fine">Released {formatDate(r.published)} · <a href={r.htmlUrl} rel="noopener">Release on GitHub ↗</a> · <a href={r.buildRunUrl} rel="noopener">Build log ↗</a> · commit <code>{r.commit.slice(0, 7)}</code></p>
+        <DownloadCta />
+        <AssetTable release={r} />
+        <section id="verify-summary">
+          <h2>Verify before you run it</h2>
+          <p>Every file above was built by GitHub Actions from commit <code>{r.commit.slice(0, 7)}</code>. Compare its SHA-256 with this table, or check its build attestation. <a href="/trust/#verify">Step-by-step instructions →</a></p>
+        </section>
+        {r.notes && <section><h2>Release notes</h2><div class="notes-text">{r.notes}</div></section>}
+      </>
+    ) : (
+      <>
+        <h1>First release coming soon</h1>
+        <p class="lede">KeyGnosys hasn't published a release yet. You can read and build the source today.</p>
+        <p><a class="btn btn-primary" href={`https://github.com/${site.repo}`} rel="noopener">View source on GitHub ↗</a></p>
+      </>
+    )}
+    {site.newsletter && <section><SubscribeForm id="download-subscribe" /></section>}
+    <p class="fine">Prefer a feed? <a href="/releases.xml">Subscribe to releases (Atom)</a>.</p>
+  </div>
+</Base>

@@ -1,0 +1,14 @@
+---
+import release from '../data/release.json';
+import { summarize, type ValidatedRelease } from '../lib/releases';
+import { staticCtaList } from '../lib/os';
+const summary = summarize(release as ValidatedRelease | null);
+const items = staticCtaList(summary);
+---
+<div class="dl-cta" data-cta data-availability data-release={JSON.stringify(summary)}>
+  {items.map((c) =>
+    c.kind === 'download' ? <a class="btn btn-primary" href={c.href} data-platform={c.platform}>{c.label}</a>
+    : c.kind === 'no-release' ? <p class="cta-note">{c.label}. <a href={c.href} rel="noopener">{c.linkLabel} ↗</a></p>
+    : null)}
+</div>
+<script>import '../scripts/download-cta';</script>

@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import DownloadCta from '../components/DownloadCta.astro';
+import ClaimList from '../components/ClaimList.astro';
+import release from '../data/release.json';
+import { trustClaims } from '../data/trust-claims';
+import { publishableClaims } from '../lib/trust';
+import type { ValidatedRelease } from '../lib/releases';
+import { site } from '../config/site';
+import '../styles/home.css';
+import { Image } from 'astro:assets';
+import hero from '../assets/keyboard-hero.png';
+const r = release as ValidatedRelease | null;
+const { claims } = publishableClaims(trustClaims, r ? { commit: r.commit, version: r.version } : null);
+---
+<Base title="KeyGnosys" description="The shortcuts you keep meaning to learn, already on the keys. A free, open-source, app-aware keyboard overlay." bodyClass="home">
+  <script slot="head" is:inline>
+    try {
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(min-height: 640px) and (min-width: 768px)').matches) {
+        var c = document.createElement('canvas');
+        if (c.getContext('webgl2') || c.getContext('webgl')) document.documentElement.classList.add('immersive-pending');
+      }
+    } catch (e) {}
+  </script>
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div id="flash" aria-hidden="true"></div>
+  <div id="overlays">
+    <section class="ov" data-page="0" data-availability aria-labelledby="h-hero">
+      <div class="inner">
+        <p class="eyebrow">Master keys to your system</p>
+        <h1 id="h-hero">The shortcuts you keep meaning to learn, <span class="em">already on the keys.</span></h1>
+        <div class="hero-static">
+          <Image src={hero} alt="" widths={[480, 800, 1280]} sizes="(max-width: 800px) 100vw, 800px" loading="eager" fetchpriority="high" />
+        </div>
+        <div class="mini" data-needs-js hidden>
+          <div class="layerseg" role="group" aria-label="Layer">
+            <button type="button" data-l="base">Base</button>
+            <button type="button" data-l="ctrl">Ctrl · Chrome</button>
+            <button type="button" data-l="caps">⇪ Cursor</button>
+          </div>
+          <div class="minikbd" id="minikbd"></div>
+        </div>
+        <div class="cta"><DownloadCta /></div>
+      </div>
+    </section>
+    <section class="ov" data-page="1" aria-labelledby="h-diff">
+      <div class="inner">
+        <p class="eyebrow">Why it's different</p>
+        <h2 id="h-diff">A reference that's <span class="em">already in front of you</span></h2>
+        <div class="bullets">
+          <div class="b"><span class="dot"></span><div><b>Adapts to the active app.</b> <span>Chrome shows Chrome's shortcuts; your editor shows its own.</span></div></div>
+          <div class="b"><span class="dot"></span><div><b>Live visual feedback.</b> <span>Keys light up as you press them — even the ones the layer suppresses.</span></div></div>
+          <div class="b"><span class="dot"></span><div><b>Yours to reshape.</b> <span>Five layouts, four legend layers. Add one by dropping a JSON file in a folder.</span></div></div>
+        </div>
+      </div>
+    </section>
+    <section class="ov" data-page="2" aria-labelledby="h-caps">
+      <div class="inner">
+        <p class="eyebrow eyebrow-cool">The CapsLock layer</p>
+        <h2 id="h-caps">Drive the mouse <span class="em cool">without leaving the home row</span></h2>
+        <p class="lede">Right hand steers, left hand clicks — so the clicking hand never interrupts motion.</p>
+        <div class="homerow">
+          <div class="hr"><span class="cap">H</span><span class="fn">◀ move</span></div>
+          <div class="hr"><span class="cap">J</span><span class="fn">▼ move</span></div>
+          <div class="hr"><span class="cap">K</span><span class="fn">▲ move</span></div>
+          <div class="hr"><span class="cap">L</span><span class="fn">▶ move</span></div>
+          <div class="hr"><span class="cap">D</span><span class="fn">click</span></div>
+          <div class="hr"><span class="cap">S</span><span class="fn">right</span></div>
+          <div class="hr"><span class="cap">F</span><span class="fn">precision</span></div>
+          <div class="hr"><span class="cap">G</span><span class="fn">drag</span></div>
+        </div>
+      </div>
+    </section>
+    <section class="ov" data-page="3" aria-labelledby="h-trust">
+      <div class="inner">
+        <p class="eyebrow">A note on trust</p>
+        <h2 id="h-trust">Structurally <span class="flag">a keylogger with a GUI</span>. So it earns trust in code.</h2>
+        {claims.length
+          ? <ClaimList claims={claims} compact />
+          : <p class="lede">Don't take our word for it. <a href="/trust/">See how to verify KeyGnosys yourself →</a></p>}
+        <div class="cta">
+          <a class="btn btn-primary" href="/trust/">How we earn trust</a>
+          <a class="btn btn-ghost" href={`https://github.com/${site.repo}`} rel="noopener">View on GitHub ↗</a>
+        </div>
+        <p class="ov-links fine"><a href="/configs/">Configs</a> · <a href="/privacy/">Privacy</a> · <a href="/releases.xml">Release feed</a></p>
+      </div>
+    </section>
+  </div>
+  <div class="hud pagenum" aria-hidden="true"><span class="cur" id="pgCur">1</span><span id="pgTot">/ 4</span></div>
+  <div class="hud scrollhint" id="hint" aria-hidden="true">SCROLL TO <b>TURN THE KEY</b></div>
+  <div class="hud dots" id="dots" role="tablist" aria-label="Pages"></div>
+  <script>
+    import '../scripts/mini-keyboard';
+    import '../scripts/home';
+  </script>
+</Base>
