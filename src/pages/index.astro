@@ -8,6 +8,8 @@ import { publishableClaims } from '../lib/trust';
 import type { ValidatedRelease } from '../lib/releases';
 import { site } from '../config/site';
 import '../styles/home.css';
+import { Image } from 'astro:assets';
+import hero from '../assets/keyboard-hero.png';
 const r = release as ValidatedRelease | null;
 const { claims } = publishableClaims(trustClaims, r ? { commit: r.commit, version: r.version } : null);
 ---
@@ -19,7 +21,9 @@ const { claims } = publishableClaims(trustClaims, r ? { commit: r.commit, versio
       <div class="inner">
         <p class="eyebrow">Master keys to your system</p>
         <h1 id="h-hero">The shortcuts you keep meaning to learn, <span class="em">already on the keys.</span></h1>
-        <div class="hero-static" data-hero-static></div>
+        <div class="hero-static">
+          <Image src={hero} alt="The KeyGnosys 3D keyboard" widths={[480, 800, 1280]} sizes="(max-width: 800px) 100vw, 800px" loading="eager" fetchpriority="high" />
+        </div>
         <div class="mini" data-needs-js hidden>
           <div class="layerseg" role="group" aria-label="Layer">
             <button type="button" data-l="base">Base</button>
@@ -79,5 +83,6 @@ const { claims } = publishableClaims(trustClaims, r ? { commit: r.commit, versio
   <div class="hud dots" id="dots" role="tablist" aria-label="Pages"></div>
   <script>
     import '../scripts/mini-keyboard';
+    import '../scripts/home';
   </script>
 </Base>
