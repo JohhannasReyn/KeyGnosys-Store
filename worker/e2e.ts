@@ -29,8 +29,12 @@ export function sandboxOverrides(): Pick<HandlerDeps, 'sendContact' | 'subscribe
   };
 }
 
+const LOCAL_HOSTS = new Set(['127.0.0.1', 'localhost']);
+
 export async function e2eEndpoint(req: Request): Promise<Response> {
-  if (new URL(req.url).pathname !== '/api/__e2e/outbox') return new Response('not found', { status: 404 });
+  const url = new URL(req.url);
+  // Defence in depth: the outbox is only ever reachable on a local wrangler dev server.
+  if (!LOCAL_HOSTS.has(url.hostname) || url.pathname !== '/api/__e2e/outbox') return new Response('not found', { status: 404 });
   if (req.method === 'DELETE') { outbox.length = 0; return new Response(null, { status: 204 }); }
   return Response.json(outbox);
 }
