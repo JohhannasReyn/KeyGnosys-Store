@@ -14,16 +14,25 @@ export const destForImage = (p: string) => `images/${p.slice(IMAGES_PREFIX.lengt
 
 const MD_IMAGE = /!\[[^\]]*\]\(\s*(?:<([^>]+)>|([^)\s]+))(?:\s+"[^"]*")?\s*\)/g;
 const HTML_IMAGE = /<img\s[^>]*?src=["']([^"']+)["']/gi;
+const HTML_IMAGE_UNQUOTED = /<img\s[^>]*?src=([^\s"'>]+)/gi;
+const REF_STYLE_IMAGE = /^\[[^\]]+\]:\s*(?:<([^>]+)>|([^\s]+))(?:\s+["']?[^"']*["']?)?$/gm;
 
 export function imageRefs(markdown: string, srcPath: string): string[] {
   const raw: string[] = [];
   for (const m of markdown.matchAll(MD_IMAGE)) raw.push(m[1] ?? m[2]);
   for (const m of markdown.matchAll(HTML_IMAGE)) raw.push(m[1]);
+  for (const m of markdown.matchAll(HTML_IMAGE_UNQUOTED)) raw.push(m[1]);
+  for (const m of markdown.matchAll(REF_STYLE_IMAGE)) raw.push(m[1] ?? m[2]);
   return raw.map((ref) => {
     if (/^[a-z][a-z0-9+.-]*:/i.test(ref) || ref.startsWith('//')) {
       throw new DocsError(`${srcPath}: external image ${ref} is not allowed (third-party request)`);
     }
-    const resolved = posix.normalize(posix.join(posix.dirname(srcPath), decodeURI(ref)));
+    let resolved: string;
+    try {
+      resolved = posix.normalize(posix.join(posix.dirname(srcPath), decodeURI(ref)));
+    } catch (e) {
+      throw new DocsError(`${srcPath}: malformed URL ${ref} (${e instanceof Error ? e.message : String(e)})`);
+    }
     if (!resolved.startsWith(IMAGES_PREFIX)) throw new DocsError(`${srcPath}: image ${ref} is outside docs/images`);
     return resolved;
   });
@@ -31,8 +40,17 @@ export function imageRefs(markdown: string, srcPath: string): string[] {
 
 export function assertSafe(markdown: string, srcPath: string): void {
   const rules: [RegExp, string][] = [
-    [/<script\b/i, '<script>'], [/\son[a-z]+\s*=/i, 'inline event handler'],
-    [/<iframe\b/i, '<iframe>'], [/javascript:/i, 'javascript: URL'],
+    [/<script\b/i, '<script>'],
+    [/[\s/"']on[a-z]+\s*=/i, 'inline event handler'],
+    [/<iframe\b/i, '<iframe>'],
+    [/<object\b/i, '<object>'],
+    [/<embed\b/i, '<embed>'],
+    [/<base\b/i, '<base>'],
+    [/<meta\b/i, '<meta>'],
+    [/<form\b/i, '<form>'],
+    [/javascript:/i, 'javascript: URL'],
+    [/vbscript:/i, 'vbscript: URL'],
+    [/javascript&(#0*58|#x0*3a|colon);/i, 'entity-encoded javascript: URL'],
   ];
   for (const [re, what] of rules) if (re.test(markdown)) throw new DocsError(`${srcPath}: ${what} is not allowed in published docs`);
 }
