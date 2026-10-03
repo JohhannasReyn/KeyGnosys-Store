@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "version": "1.0.0",
+  "tag": "v1.0.0",
+  "commit": "1111111111111111111111111111111111111111",
+  "published": "2026-10-15T12:00:00Z",
+  "buildRunUrl": "https://github.com/JohhannasReyn/KeyGnosys/actions/runs/1000",
+  "artifacts": [
+    {
+      "platform": "windows",
+      "arch": "x64",
+      "format": "installer",
+      "file": "KeyGnosys-1.0.0-windows-x64-setup.exe",
+      "size": 12345678,
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "primary": true
+    },
+    {
+      "platform": "linux",
+      "arch": "x64",
+      "format": "appimage",
+      "file": "KeyGnosys-1.0.0-linux-x64.AppImage",
+      "size": 23456789,
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "primary": true
+    },
+    {
+      "platform": "linux",
+      "arch": "x64",
+      "format": "deb",
+      "file": "KeyGnosys 1.0.0 amd64.deb",
+      "size": 3456789,
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "primary": false
+    }
+  ]
+}
