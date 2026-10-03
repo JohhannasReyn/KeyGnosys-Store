@@ -1,0 +1,60 @@
+/* ---------- content (flat, default) ---------- */
+.home .ov { padding: 4rem clamp(16px, 5vw, 40px); border-bottom: 1px solid var(--line); text-align: center; }
+.home .ov .inner { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.home .ov h1 { font-size: clamp(2.3rem, 6vw, 4rem); line-height: 1.03; }
+.home .ov h2 { font-size: clamp(1.9rem, 5vw, 3rem); line-height: 1.06; }
+.home .em { font-style: italic; color: var(--accent); } .home .em.cool { color: var(--cool); }
+.home .eyebrow-cool { color: var(--cool); }
+.home .ov p.lede { font-size: clamp(1.02rem, 2.2vw, 1.24rem); max-width: 42ch; line-height: 1.5; }
+.home .ov .cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.home .ov .dl-cta { justify-content: center; margin: 0; }
+.bullets { display: grid; gap: 12px; text-align: left; margin-top: 6px; }
+.bullets .b { display: flex; gap: 12px; align-items: flex-start; }
+.bullets .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 9px; }
+.bullets b { font-weight: 600; } .bullets span { color: var(--ink-dim); }
+.homerow { display: grid; grid-template-columns: repeat(4, minmax(64px, 88px)); gap: 10px; margin-top: 8px; }
+.hr { background: rgba(255,255,255,0.03); border: 1px solid var(--key-edge); border-radius: 12px; padding: 12px 8px; }
+.hr .cap { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 17px; color: var(--cool); }
+.hr .fn { display: block; margin-top: 5px; font-size: 11px; color: var(--ink-dim); }
+.flag { font-family: "JetBrains Mono", monospace; color: var(--accent); font-size: 0.9em; }
+.home .claims { text-align: left; width: 100%; }
+.hero-static img { max-width: 100%; height: auto; border-radius: 14px; }
+.mini { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 8px; width: 100%; }
+.mini[hidden] { display: none; }
+.layerseg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 11px; padding: 4px; gap: 2px; }
+.layerseg button { font-family: "JetBrains Mono", monospace; font-size: 12px; cursor: pointer; border: 0; background: transparent; color: var(--ink-dim); padding: 7px 12px; border-radius: 8px; }
+.layerseg button[aria-pressed="true"] { background: var(--key); color: var(--ink); }
+.layerseg button[data-l="ctrl"][aria-pressed="true"] { color: var(--accent); }
+.layerseg button[data-l="caps"][aria-pressed="true"] { color: var(--cool); }
+.minikbd { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; max-width: 100%; overflow-x: auto; }
+.mrow { display: flex; gap: 6px; justify-content: center; }
+.mk { position: relative; width: clamp(40px,7vw,58px); height: clamp(40px,7vw,58px); border-radius: 9px; background: var(--key); border: 1px solid var(--key-edge); display: flex; align-items: center; justify-content: center; padding: 3px; }
+.mk .m { font-family: "JetBrains Mono", monospace; font-size: clamp(11px,1.4vw,14px); color: #E7E9EE; text-align: center; line-height: 1.05; }
+.mk .tg { position: absolute; top: 3px; left: 5px; font-family: "JetBrains Mono", monospace; font-size: 8px; color: var(--ink-faint); opacity: 0; }
+.mk.rl .m { font-family: "Hanken Grotesk", sans-serif; font-weight: 600; font-size: clamp(7.5px,1vw,9.5px); }
+.mk.rl .tg { opacity: 1; }
+.mk.dim { opacity: .32; }
+.mk.a { border-color: var(--accent); background: var(--accent-soft); } .mk.a .m { color: var(--accent); }
+.mk.co { border-color: var(--cool); background: var(--cool-soft); } .mk.co .m { color: var(--cool); }
+
+/* ---------- immersive (added by keyboard-scene.ts) ---------- */
+.home #gl, .home #flash, .home .hud { display: none; }
+body.immersive { height: 100vh; overflow: hidden; }
+body.immersive .site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 40; max-width: none; }
+body.immersive .site-footer, body.immersive .hero-static { display: none; }
+body.immersive #gl { display: block; position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; }
+body.immersive #flash { display: block; position: fixed; inset: 0; z-index: 15; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 46%, rgba(255,241,208,0.95), rgba(242,180,65,0.55) 38%, rgba(242,180,65,0) 68%); }
+body.immersive #overlays { position: fixed; inset: 0; z-index: 20; pointer-events: none; }
+body.immersive .ov { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 90px clamp(20px,5vw,40px) 120px; gap: 20px; border: 0; opacity: 0; transform: scale(0.985); transition: opacity .45s ease, transform .45s ease; }
+body.immersive .ov.show { opacity: 1; transform: none; pointer-events: auto; }
+body.immersive .hud { display: block; position: fixed; z-index: 30; pointer-events: none; }
+body.immersive .dots { display: flex; left: 0; right: 0; bottom: 26px; gap: 10px; justify-content: center; }
+body.immersive .dots button { pointer-events: auto; width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--ink-faint); background: transparent; cursor: pointer; transition: background .2s, transform .2s, border-color .2s; }
+body.immersive .dots button[aria-current="true"] { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
+body.immersive .scrollhint { left: 0; right: 0; bottom: 52px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: .08em; color: var(--ink-faint); transition: opacity .4s; }
+body.immersive .scrollhint b { color: var(--ink-dim); font-weight: 500; }
+body.immersive .pagenum { top: 50%; right: clamp(14px,3vw,34px); transform: translateY(-50%); font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-faint); text-align: right; }
+body.immersive .pagenum .cur { color: var(--accent); font-size: 26px; display: block; line-height: 1; }
+@media (prefers-reduced-motion: reduce) { body.immersive .ov { transition: none; } }
