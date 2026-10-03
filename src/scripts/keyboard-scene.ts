@@ -4,85 +4,32 @@ import { AmbientLight, BoxGeometry, CanvasTexture, CircleGeometry, CylinderGeome
 export function start(): boolean {
   "use strict";
 
+  // Each page is a plain card skin; its text lives only in the HTML overlay (#overlays), shown at rest.
   var PAGES = [
-    { eyebrow:"MASTER KEYS TO YOUR SYSTEM", ec:"#F2B441", accent:"#F2B441",
-      runs:[ {t:"The shortcuts you keep meaning to learn, "},
-             {t:"already on the keys.", c:"#F2B441", i:true} ] },
-    { eyebrow:"WHY IT'S DIFFERENT", ec:"#F2B441", accent:"#F2B441",
-      runs:[ {t:"A reference that's "},
-             {t:"already in front of you.", c:"#F2B441", i:true} ] },
-    { eyebrow:"THE CAPSLOCK LAYER", ec:"#4FD1C5", accent:"#4FD1C5",
-      runs:[ {t:"Drive the mouse "},
-             {t:"without leaving the home row.", c:"#4FD1C5", i:true} ] },
-    { eyebrow:"A NOTE ON TRUST", ec:"#F2B441", accent:"#F2B441",
-      runs:[ {t:"Structurally "},
-             {t:"a keylogger with a GUI.", c:"#F2B441", mono:true},
-             {t:" So it earns trust in code."} ] }
+    { accent:"#F2B441" },
+    { accent:"#F2B441" },
+    { accent:"#4FD1C5" },
+    { accent:"#F2B441" }
   ];
   var N = PAGES.length;
   var reduce = false;
   try { reduce = matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
 
-  /* ---------- page texture skins (canvas) ---------- */
-  function fontFor(run, px) {
-    var wt = run.mono ? "700" : "600";
-    var it = run.i ? "italic " : "";
-    var fam = run.mono ? '"JetBrains Mono", monospace' : '"Fraunces", Georgia, serif';
-    return it + wt + " " + px + 'px ' + fam;
-  }
+  /* ---------- page texture skins (canvas): card surface and accent-tinted border, no text ---------- */
   function makeTexture(page) {
     var W = 1024, H = 1024;
     var c = document.createElement("canvas"); c.width = W; c.height = H;
     var x = c.getContext("2d");
     x.fillStyle = "#101116"; x.fillRect(0, 0, W, H);
     x.fillStyle = "#16171d"; roundRect(x, 70, 70, W-140, H-140, 44); x.fill();
-    x.strokeStyle = "rgba(255,255,255,0.06)"; x.lineWidth = 2; roundRect(x, 70, 70, W-140, H-140, 44); x.stroke();
-    /* eyebrow */
-    x.fillStyle = page.ec || page.accent; x.font = '500 24px "JetBrains Mono", monospace';
-    x.textAlign = "center"; x.textBaseline = "middle";
-    x.save(); x.translate(W/2, H*0.31); spacedText(x, page.eyebrow, 7); x.restore();
-    /* headline: full page text, wrapped, with the italic/mono accent runs preserved */
-    var fontPx = 80, lineH = 92, maxW = W - 240;
-    var words = [];
-    page.runs.forEach(function (r) {
-      r.t.split(/\s+/).forEach(function (w) { if (w) words.push({ w: w, r: r }); });
-    });
-    var lines = [[]], lineW = 0;
-    words.forEach(function (word) {
-      x.font = fontFor(word.r, fontPx);
-      var ww = x.measureText(word.w).width;
-      var sw = x.measureText(" ").width;
-      var cur = lines[lines.length - 1];
-      var add = (cur.length ? sw : 0) + ww;
-      if (lineW + add > maxW && cur.length) { lines.push([]); lineW = 0; add = ww; }
-      lines[lines.length - 1].push({ word: word, w: ww, sw: sw });
-      lineW += add;
-    });
-    var startY = H * 0.56, y0 = startY - (lines.length - 1) * lineH / 2;
-    x.textAlign = "left"; x.textBaseline = "middle";
-    lines.forEach(function (line, li) {
-      var lw = 0; line.forEach(function (it, idx) { lw += it.w + (idx ? it.sw : 0); });
-      var px = W/2 - lw/2, yy = y0 + li * lineH;
-      line.forEach(function (it, idx) {
-        if (idx) px += it.sw;
-        x.font = fontFor(it.word.r, fontPx);
-        x.fillStyle = it.word.r.c || "#ECEDF1";
-        x.fillText(it.word.w, px, yy);
-        px += it.w;
-      });
-    });
+    /* accent-tinted border carries the page colour now that the text lives in the overlay */
+    x.strokeStyle = page.accent; x.globalAlpha = 0.35; x.lineWidth = 3; roundRect(x, 70, 70, W-140, H-140, 44); x.stroke(); x.globalAlpha = 1;
     var tex = new CanvasTexture(c);
     tex.colorSpace = SRGBColorSpace;
     tex.anisotropy = 4;
     return tex;
   }
   function roundRect(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
-  function spacedText(x, str, sp) {
-    var total = 0, ws = [];
-    for (var i=0;i<str.length;i++){ var w = x.measureText(str[i]).width + sp; ws.push(w); total += w; }
-    var cx = -total/2;
-    for (var j=0;j<str.length;j++){ x.fillText(str[j], cx + ws[j]/2, 0); cx += ws[j]; }
-  }
 
   /* ---------- three.js scene ---------- */
   var canvas = document.getElementById("gl");
