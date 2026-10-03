@@ -1,0 +1,10 @@
+---
+interface Props { name: string; price: string; description: string; perks?: string[] }
+const { name, price, description, perks = [] } = Astro.props;
+---
+<div class="card price">
+  <h3>{name}</h3>
+  <p class="price-amount">{price}</p>
+  <p>{description}</p>
+  {perks.length > 0 && <ul>{perks.map((p) => <li>{p}</li>)}</ul>}
+</div>

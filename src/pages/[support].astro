@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import PriceCard from '../components/PriceCard.astro';
+import { site } from '../config/site';
+export function getStaticPaths() {
+  return site.sponsorship ? [{ params: { support: 'support' } }] : [];
+}
+const s = site.sponsorship!;
+---
+<Base title="Support KeyGnosys" description="Support KeyGnosys development. Supporters get thanks and credit, never features.">
+  <div class="wrap page">
+    <p class="eyebrow">Support</p>
+    <h1>Keep KeyGnosys free for everyone</h1>
+    <p class="lede">Supporters get our thanks and credit, never features. KeyGnosys stays free and open source for everyone.</p>
+    <div class="grid">{s.tiers.map((t) => <PriceCard name={t.name} price={`$${t.monthlyUsd}/month`} description="" perks={t.perks} />)}</div>
+    <p>
+      {s.githubSponsorsUrl && <a class="btn btn-primary" href={s.githubSponsorsUrl} rel="noopener">GitHub Sponsors ↗</a>}
+      {s.openCollectiveUrl && <a class="btn" href={s.openCollectiveUrl} rel="noopener">Open Collective ↗</a>}
+    </p>
+  </div>
+</Base>

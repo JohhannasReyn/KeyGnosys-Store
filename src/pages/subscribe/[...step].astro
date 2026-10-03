@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import SubscribeForm from '../../components/SubscribeForm.astro';
+import { site } from '../../config/site';
+export function getStaticPaths() {
+  if (!site.newsletter) return [];
+  return [undefined, 'check-email', 'confirmed', 'failed'].map((step) => ({ params: { step } }));
+}
+const { step } = Astro.params;
+const mail = `mailto:${site.contactAddress}`;
+---
+<Base title="Release updates" description="Get notified of new KeyGnosys releases." footerSubscribe={false}>
+  <div class="wrap page narrow">
+    {step === undefined && (<><h1>Get release updates</h1><SubscribeForm id="subscribe-page" heading="Your email" /></>)}
+    {step === 'check-email' && (<div role="status"><h1>Check your inbox</h1><p class="lede">If that address isn't already subscribed, we've sent a confirmation link. Nothing is sent unless you confirm.</p></div>)}
+    {step === 'confirmed' && (<div role="status"><h1>You're subscribed</h1><p class="lede">Thanks! You'll hear from us when there's a new release.</p></div>)}
+    {step === 'failed' && (<div role="alert"><h1>We couldn't start your subscription</h1><p class="lede">Please try again in a few minutes, or email <a href={mail}>{site.contactAddress}</a>.</p></div>)}
+  </div>
+</Base>
