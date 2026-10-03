@@ -5,7 +5,7 @@ import type { TrustClaim } from '../lib/trust';
  * entry is pinned to the current release commit (or any commit before the first release).
  * See docs/launch-checklist.md, "Re-verify trust claims".
  */
-const C = '84a571b8154e256efca2ee9144a32bf3dcbfdf5e'; // app repo main when evidence was drafted
+const C = '84a571b8154e256efca2ee9144a32bf3dcbfdf5e'; // app repo main on GitHub when evidence was drafted and re-checked (2026-10-03)
 
 export const trustClaims: TrustClaim[] = [
   {
@@ -21,13 +21,14 @@ export const trustClaims: TrustClaim[] = [
   },
   {
     id: 'no-network',
-    title: 'No network, ever',
-    detail: 'No telemetry, no update check, no crash upload.',
+    title: 'No network code beyond the IPC endpoint',
+    detail: 'The core and the UI talk to each other over an owner-only IPC endpoint: a Unix domain socket on Linux, a named pipe on Windows. In the cited core and UI sources, that endpoint is the only networking code: no TCP/UDP sockets and no HTTP client.',
     verified: false,
     evidence: [
-      { commit: C, path: 'docs/SPEC.md', lines: [2117, 2119], label: 'The commitment: no sockets beyond the local IPC endpoint (SPEC §12.2)' },
-      { commit: C, path: 'core/src/endpoint_posix.cpp', lines: [481, 490], label: 'The only socket the core opens is AF_UNIX (endpoint_posix.cpp)' },
-      { commit: C, path: 'python/keygnosys/coreclient/ipc.py', lines: [19, 19], label: 'The UI talks to the core over a local socket only (ipc.py)' },
+      { commit: C, path: 'core/src/endpoint_posix.cpp', lines: [481, 491], label: 'Linux: the only socket the core opens is AF_UNIX (endpoint_posix.cpp)' },
+      { commit: C, path: 'core/src/endpoint_windows.cpp', lines: [131, 133], label: 'Windows: the core serves a named pipe, not a network socket (endpoint_windows.cpp)' },
+      { commit: C, path: 'python/keygnosys/coreclient/ipc.py', lines: [19, 34], label: 'The UI imports only QLocalSocket for networking (ipc.py)' },
+      { commit: C, path: 'python/keygnosys/paths.py', lines: [46, 51], label: 'The endpoint the UI connects to is a pipe or socket path, not a host (paths.py)' },
     ],
   },
   {
@@ -42,13 +43,13 @@ export const trustClaims: TrustClaim[] = [
   },
   {
     id: 'least-privilege',
-    title: 'Least privilege',
-    detail: 'Owner-only socket; no elevation on Windows by default.',
+    title: 'Owner-only IPC endpoint',
+    detail: 'Only the user who started the core can open its IPC endpoint: the socket is mode 0600 on Linux, and the named pipe’s DACL grants only the creating user on Windows.',
     verified: false,
     evidence: [
-      { commit: C, path: 'core/src/endpoint_posix.cpp', lines: [492, 506], label: 'Linux socket created mode 0600 (endpoint_posix.cpp)' },
-      { commit: C, path: 'core/src/endpoint_windows.cpp', lines: [50, 118], label: 'Windows pipe DACL grants the creating user only (endpoint_windows.cpp)' },
-      { commit: C, path: 'docs/SPEC.md', lines: [1603, 1605], label: 'Running unelevated is the default on Windows (SPEC)' },
+      { commit: C, path: 'core/src/endpoint_posix.cpp', lines: [493, 505], label: 'Linux socket bound under umask 0177, then set to mode 0600 (endpoint_posix.cpp)' },
+      { commit: C, path: 'core/src/endpoint_windows.cpp', lines: [50, 121], label: 'Windows pipe DACL grants the creating user only (endpoint_windows.cpp)' },
+      { commit: C, path: 'core/src/endpoint_windows.cpp', lines: [131, 133], label: 'The pipe is created with that owner-only DACL (endpoint_windows.cpp)' },
     ],
   },
 ];
