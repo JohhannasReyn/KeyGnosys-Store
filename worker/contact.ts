@@ -36,10 +36,16 @@ export async function handleContact(req: Request, d: HandlerDeps): Promise<Respo
   d.log(r.fast ? 'contact.sent_flagged' : 'contact.sent');
 
   // Separate operation: a newsletter problem never affects the contact that was already sent.
-  if (r.values.newsletter && d.newsletterEnabled && !r.fast) {
+  if (r.values.newsletter && !r.fast) {
     let outcome: SubscribeOutcome;
-    try { outcome = await d.subscribe(r.values.email); } catch { outcome = 'failed'; }
-    d.log(`newsletter.${outcome}`);
+    if (!d.newsletterEnabled) {
+      // The visitor asked to subscribe but no provider is configured: tell them it didn't happen.
+      outcome = 'failed';
+      d.log('newsletter.not_configured');
+    } else {
+      try { outcome = await d.subscribe(r.values.email); } catch { outcome = 'failed'; }
+      d.log(`newsletter.${outcome}`);
+    }
     return done(outcome === 'ok' ? '/teams/thanks/confirm-subscription/' : '/teams/thanks/subscription-failed/');
   }
   return done('/teams/thanks/');

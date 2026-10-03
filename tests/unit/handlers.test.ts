@@ -93,14 +93,22 @@ describe('contact', () => {
     expect(rec.sent).toHaveLength(1);
     expect(res.headers.get('Location')).toBe('/teams/thanks/subscription-failed/');
   });
-  it('no subscription when unchecked or newsletter disabled', async () => {
+  it('no subscription when unchecked, even with the newsletter disabled', async () => {
     const a = harness();
     await route(post('/api/contact', valid), a.deps, H);
     expect(a.rec.subscribed).toEqual([]);
     const b = harness({ newsletterEnabled: false });
-    const res = await route(post('/api/contact', { ...valid, newsletter: 'on' }), b.deps, H);
+    const res = await route(post('/api/contact', valid), b.deps, H);
     expect(b.rec.subscribed).toEqual([]);
     expect(res.headers.get('Location')).toBe('/teams/thanks/');
+  });
+  it('ticked newsletter while disabled: contact sent, subscription reported as failed', async () => {
+    const { deps, rec } = harness({ newsletterEnabled: false });
+    const res = await route(post('/api/contact', { ...valid, newsletter: 'on' }), deps, H);
+    expect(rec.sent).toHaveLength(1);
+    expect(rec.subscribed).toEqual([]);
+    expect(res.headers.get('Location')).toBe('/teams/thanks/subscription-failed/');
+    expect(rec.logs).toEqual(['contact.sent', 'newsletter.not_configured']);
   });
   it('fast submission: delivered with spam tag, newsletter not acted on', async () => {
     const { deps, rec } = harness();
