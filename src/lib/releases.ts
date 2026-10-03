@@ -33,7 +33,7 @@ export function publishedReleases(list: GhRelease[]): GhRelease[] {
 export function validateRelease(release: GhRelease, manifestJson: unknown): ValidatedRelease {
   const tag = release.tag_name;
   const parsed = ManifestSchema.safeParse(manifestJson);
-  if (!parsed.success) throw new ReleaseError(`${tag}: manifest invalid:\n${parsed.error.toString()}`);
+  if (!parsed.success) throw new ReleaseError(`${tag}: manifest invalid:\n${z.prettifyError(parsed.error)}`);
   const m = parsed.data;
   if (m.tag !== tag) throw new ReleaseError(`${tag}: manifest tag ${m.tag} does not match release tag`);
 

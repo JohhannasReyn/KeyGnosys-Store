@@ -17,7 +17,7 @@ export const ManifestSchema = z.strictObject({
   version: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
   tag: z.string().min(1),
   commit: z.string().regex(/^[0-9a-f]{40}$/),
-  published: z.string().datetime(),
+  published: z.iso.datetime(),
   buildRunUrl: z.string().regex(/^https:\/\/github\.com\/JohhannasReyn\/KeyGnosys\/actions\/runs\/\d+(?:\/.*)?$/),
   artifacts: z.array(ArtifactSchema).min(1),
 });
