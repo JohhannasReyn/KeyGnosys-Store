@@ -1,0 +1,30 @@
+---
+import { groupByPlatform, type ValidatedRelease } from '../lib/releases';
+import { formatBytes } from '../lib/format';
+interface Props { release: ValidatedRelease }
+const groups = groupByPlatform(Astro.props.release);
+const FORMAT_LABELS: Record<string, string> = {
+  installer: 'Installer', portable: 'Portable', appimage: 'AppImage', deb: '.deb package', rpm: '.rpm package', tarball: '.tar.gz archive',
+};
+---
+{groups.map((g) => (
+  <section class="platform" id={g.platform} aria-labelledby={`h-${g.platform}`}>
+    <h2 id={`h-${g.platform}`}>{g.name}</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">File</th><th scope="col">Format</th><th scope="col">Arch</th><th scope="col">Size</th><th scope="col">SHA-256</th></tr></thead>
+        <tbody>
+          {g.artifacts.map((a) => (
+            <tr>
+              <td><a href={a.url}>{a.file}</a>{a.primary && <span class="badge">Recommended</span>}</td>
+              <td>{FORMAT_LABELS[a.format]}</td>
+              <td>{a.arch}</td>
+              <td>{formatBytes(a.size)}</td>
+              <td><code class="sha">{a.sha256}</code></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+))}

@@ -52,3 +52,8 @@ table { border-collapse: collapse; width: 100%; } th, td { text-align: left; pad
 .sha { word-break: break-all; font-size: .8rem; color: var(--ink-dim); }
 pre { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; overflow-x: auto; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+.dl-cta { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin: 1.5rem 0; }
+.cta-note { margin: 0; color: var(--ink-dim); }
+.cta-others { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--ink-dim); }
+.notes-text { white-space: pre-wrap; color: var(--ink-dim); }
