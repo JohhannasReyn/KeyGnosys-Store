@@ -9,3 +9,5 @@
 | `npm run check:lighthouse` | Lighthouse (npm `lighthouse`, version pinned in package-lock), default mobile config with simulated throttling, Playwright's Chromium, headless; 3 runs per route; median; performance ≥ 95 and accessibility ≥ 95 |
 
 Lighthouse runs against `astro preview` (static files only), on GitHub's `ubuntu-24.04` runner in CI. Simulated throttling makes scores mostly independent of runner speed. If a performance score flaps around 95, check the run-to-run spread in the log before changing anything; do not lower the threshold.
+
+The home page's 3D scene starts on the visitor's first interaction (pointer, scroll, touch or key), so Lighthouse measures the pre-interaction state.
