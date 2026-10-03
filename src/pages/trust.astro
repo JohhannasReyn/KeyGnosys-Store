@@ -7,6 +7,7 @@ import { publishableClaims } from '../lib/trust';
 import { groupByPlatform, type ValidatedRelease } from '../lib/releases';
 import type { Platform } from '../lib/platforms';
 import { site } from '../config/site';
+import { buildCsp } from '../security/headers';
 const r = release as ValidatedRelease | null;
 const { claims, warnings } = publishableClaims(trustClaims, r ? { commit: r.commit, version: r.version } : null);
 for (const w of warnings) console.warn(`[trust] ${w}`);
@@ -19,6 +20,8 @@ const verify = r
   ? groupByPlatform(r).map((g) => ({ name: g.name, file: g.artifacts[0].file, ...CHECKSUM[g.platform] }))
   : [];
 const GENERIC = '<downloaded-file>';
+// Hash values vary per build; the exact list is in the Content-Security-Policy response header.
+const csp = buildCsp({ scriptHashes: ['sha256-…'], styleHashes: ['sha256-…'], styleAttrHashes: ['sha256-…'] });
 ---
 <Base title="Trust" description="How to verify KeyGnosys and this website for yourself.">
   <div class="wrap page">
@@ -67,7 +70,8 @@ const GENERIC = '<downloaded-file>';
         <li><strong>Open source and public builds.</strong> <a href={`https://github.com/${site.siteRepo}`} rel="noopener">Site source ↗</a> · <a href={`https://github.com/${site.siteRepo}/actions`} rel="noopener">every deploy's build log ↗</a></li>
       </ul>
       <p>The policy your browser enforces on this site:</p>
-      <pre><code>default-src 'self'; script-src 'self' + build-time hashes; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'</code></pre>
+      <pre><code>{csp}</code></pre>
+      <p class="fine">Each <code>sha256-…</code> stands for a hash computed at build time. The exact hashes are in the Content-Security-Policy response header of every page.</p>
     </section>
   </div>
 </Base>
