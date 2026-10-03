@@ -152,8 +152,8 @@ Enforced by the test in §11.3 and by the CSP in §6.5.
 ### 6.2 Stack and hosting
 
 - **Astro** (static output) + **Starlight** for `/docs`.
-- **Cloudflare Workers with static assets** (Cloudflare's current recommendation for new projects; confirm at plan time — Pages is the fallback). Server endpoints `/api/contact` and `/api/subscribe` run as Worker routes on the same origin.
-- **Deploys run in this repo's GitHub Actions** (`wrangler deploy`) on push to `main` and on `repository_dispatch` from the app repo. Every PR (including from forks) runs the full build and test suite without secrets. Preview deployments, which need Cloudflare credentials, run only for trusted PR contexts (branches in this repo, not forks); fork PRs never receive deployment secrets. Build logs are public.
+- **Cloudflare Workers with static assets** (verified 2026-10-02 as Cloudflare's recommendation for new projects). Server endpoints `/api/contact` and `/api/subscribe` run as Worker routes on the same origin. Static-asset routing, bindings and preview settings are defined in `wrangler.jsonc` (not only in the dashboard). Wrangler is pinned at a version supporting Worker Previews (≥ 4.135.0).
+- **Deploys run in this repo's GitHub Actions** (`wrangler deploy`) on push to `main` and on `repository_dispatch` from the app repo. Every PR (including from forks) runs the full build and test suite without secrets. Fork PRs get build and test only, with no deployment or provider secrets. Preview deployments, which need Cloudflare credentials, run only for trusted PR contexts (branches in this repo). Previews deploy to a **separate preview Worker** that has no email binding and no newsletter credentials: its forms run in a sandbox mode that never contacts production email or newsletter resources. Build logs are public.
 - DNS for `keygnosys.com` on Cloudflare; Email Routing forwards `hello@keygnosys.com` to the owner's inbox.
 
 ### 6.3 Repo layout
@@ -212,7 +212,10 @@ No `'unsafe-inline'` for scripts. Any unavoidable inline script (e.g. Starlight'
 
 `<form method="post" action="/api/contact">`. The endpoint:
 
-1. Applies rate limiting (Cloudflare Rate Limiting binding; 5 requests per 10 minutes per client, shared across `/api/contact` and `/api/subscribe`, keyed on the client IP transiently — never stored or logged).
+1. Applies rate limiting: Cloudflare's native Rate Limiting binding, **3 requests per 60 seconds per visitor**, shared across `/api/contact` and `/api/subscribe`.
+   - This is an intentional change from the earlier 5-per-10-minutes draft (the binding supports only 10 s or 60 s periods), not an equivalent.
+   - It is a **burst-abuse control, not a globally strict quota**: Cloudflare's counters are local to each data-center location and eventually consistent.
+   - The client IP is used only transiently, as the input to an anonymous limiter key (salted SHA-256 hash). It is never persisted or logged.
 2. Validates every field server-side (client validation is advisory only).
 3. On validation errors: responds `422` with a first-party HTML page re-rendering the form with field errors and submitted values preserved (newsletter box keeps the visitor's choice).
 4. Honeypot filled: `303` → `/teams/thanks` as if successful, and sends nothing. Fast submission (< 3 s) alone: the message is still delivered, with the subject prefixed `[Possible spam]` and the newsletter opt-in not acted on.
@@ -276,7 +279,7 @@ Build fetches `docs/guide/` (Markdown + referenced images from `docs/images/`) f
 The docs page footer states which version/commit the docs describe. Developer docs (`SPEC.md`, plans, test logs, superpowers specs) are never published. If `docs/guide/` does not exist at that ref (API 404), docs are omitted and the nav link hidden; any other API error fails the build.
 
 ### 9.3 Trust claims
-Each claim on `/trust` about app behavior (e.g. "no network access", "no keystroke content written to disk") must cite evidence — source, tests, build config, or architecture docs — via permalinks **pinned to a commit SHA** (never `main` or moving line numbers). Claims describing a downloadable release cite evidence at that release manifest's `commit`; before the first release, evidence is pinned to a specific `main` commit and labelled as pre-release. When a new release changes the cited commit, claims are re-verified and links updated as part of the release checklist. A claim without pinned evidence is not published.
+Each claim on `/trust` about app behavior (e.g. "no network access", "no keystroke content written to disk") must cite evidence — source, tests, build config, or architecture docs — via permalinks **pinned to a commit SHA** (never `main` or moving line numbers). Claims describing a downloadable release cite evidence at that release manifest's `commit`; before the first release, evidence is pinned to a specific `main` commit and labelled as pre-release. When a new release changes the cited commit, claims are re-verified and links updated as part of the release checklist. A claim without pinned evidence is not published. Claims **default to unpublished**: a claim appears only after the owner explicitly marks its evidence as checked (`verified: true`). Implementers and automation never set that flag.
 
 ## 10. Feature configuration
 
@@ -313,7 +316,7 @@ Playwright records every request while loading each route and running scripted i
 - **Lighthouse CI** (pinned Lighthouse version, mobile preset, simulated throttling, median of 3 runs, config committed): accessibility ≥ 95 hard fail; performance ≥ 95 asserted. The environment is documented in the config so variance failures are diagnosable.
 
 ### 11.5 Headers
-Test asserts §6.5 headers on local preview for HTML, assets and `/api/*` responses. A post-deploy smoke check verifies the same against production (HSTS asserted once enabled).
+Test asserts §6.5 headers on local preview for HTML, assets and `/api/*` responses. A post-deploy smoke check verifies the same against both production hostnames, the apex `keygnosys.com` and `www.keygnosys.com` (following www's redirect to the apex), over HTTPS. HSTS stays disabled until that check passes on both hostnames, and is asserted once enabled.
 
 ### 11.6 Links
 Link checker over built output (internal hard fail; external reported).
@@ -346,6 +349,6 @@ Must be confirmed before implementation starts; the plan records the outcome and
 1. Cloudflare's current recommended hosting for new projects (Workers static assets vs. Pages) and its PR-preview model.
 2. The mechanism for applying §6.5 security headers to static assets and `/api/*` responses on the chosen platform.
 3. Cloudflare Email Routing send-email binding restrictions (verified destinations, sender domain requirements, DNS prerequisites, limits).
-4. Cloudflare Rate Limiting binding availability and semantics on the chosen plan.
+4. Cloudflare Rate Limiting binding availability and semantics on the chosen plan. (Verified: GA; periods 10 s or 60 s only; location-local. Resolved by the 3-per-60-s decision in §7.2.)
 5. Newsletter provider (Buttondown or alternative): API subscriber creation, double opt-in, one-click unsubscribe, ability to disable open/click tracking.
 6. Starlight/Astro compatibility with a hash-based CSP (no `'unsafe-inline'` scripts) and non-inlined styles.
