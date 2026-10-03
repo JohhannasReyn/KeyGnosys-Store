@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config/site';
+const UPDATED = '2026-10-02';
+---
+<Base title="Privacy" description="KeyGnosys.com privacy policy in plain English.">
+  <div class="wrap page narrow">
+    <p class="eyebrow">Privacy</p>
+    <h1>This website doesn't track you.</h1>
+    <p class="lede">No cookies, no analytics, and no third-party scripts, fonts or embeds. Every file comes from keygnosys.com.</p>
+    <h2>Browsing</h2>
+    <p>We collect nothing when you browse. Our host, Cloudflare, processes standard request data (such as your IP address) to deliver pages and block abuse. We don't log or analyze it.</p>
+    <h2>Contact form</h2>
+    <p>When you send the contact form, your name, email, company and message are emailed to us at <a href={`mailto:${site.contactAddress}`}>{site.contactAddress}</a>. The website stores nothing. We keep the email in our inbox to reply and follow up, and delete it on request.</p>
+    <h2>Abuse protection</h2>
+    <p>To limit spam, the contact and newsletter forms count submissions per visitor for about a minute, using a one-way hash of your IP address. The hash isn't stored or logged by us.</p>
+    {site.newsletter && (
+      <>
+        <h2>Newsletter</h2>
+        <p>If you subscribe, your email address and sign-up date are stored by our newsletter provider, Buttondown. You'll get a confirmation email first, and nothing is sent unless you confirm. Every email has a one-click unsubscribe link and our postal address. Our emails contain no tracking pixels and no tracked links. To have your address deleted, unsubscribe or email us.</p>
+      </>
+    )}
+    <h2>The KeyGnosys app</h2>
+    <p>See the <a href="/trust/">trust page</a> for what the app does and doesn't do, with links to the source code that shows it.</p>
+    <p class="fine">Last updated {UPDATED}.</p>
+  </div>
+</Base>

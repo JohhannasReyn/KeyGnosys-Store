@@ -1,0 +1,8 @@
+---
+import Base from '../../layouts/Base.astro';
+import { site } from '../../config/site';
+---
+<Base title="Too many requests" description="Please wait a minute and try again.">
+  <div class="wrap page"><h1>Too many requests</h1>
+    <p class="lede">Please wait a minute and try again, or email <a href={`mailto:${site.contactAddress}`}>{site.contactAddress}</a>.</p></div>
+</Base>
