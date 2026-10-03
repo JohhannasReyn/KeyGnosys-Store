@@ -79,7 +79,7 @@ describe('buildContent', () => {
     await expect(buildContent(source({ listPaths: async () => ['docs/guide/index.md'] }))).rejects.toThrow(/k\.png.*not found/);
   });
   it('unsafe docs fail', async () => {
-    const bad = { ...files, 'docs/guide/index.md': '# W\n<script>x</script>' };
+    const bad: Record<string, string> = { ...files, 'docs/guide/index.md': '# W\n<script>x</script>' };
     await expect(buildContent(source({ readFile: async (_c, p) => enc(bad[p]) }))).rejects.toThrow(/<script>/);
   });
 });

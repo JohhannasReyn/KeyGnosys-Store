@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "keygnosys-site",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "workers_dev": true,
+  "preview_urls": false,
+  "send_email": [{ "name": "CONTACT_EMAIL" }],
+  "ratelimits": [{ "name": "RL", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } }],
+  "vars": {
+    "CONTACT_FROM": "contact-form@keygnosys.com",
+    "BUTTONDOWN_API_BASE": "https://api.buttondown.com"
+  },
+  "env": {
+    "preview": {
+      "name": "keygnosys-site-preview",
+      "workers_dev": true,
+      "preview_urls": true,
+      "ratelimits": [{ "name": "RL", "namespace_id": "1002", "simple": { "limit": 3, "period": 60 } }],
+      "vars": {
+        "CONTACT_FROM": "contact-form@keygnosys.com",
+        "BUTTONDOWN_API_BASE": "https://api.buttondown.com",
+        "SANDBOX_FORMS": "on"
+      }
+    },
+    "e2e": {
+      "vars": {
+        "CONTACT_FROM": "contact-form@keygnosys.com",
+        "BUTTONDOWN_API_BASE": "http://127.0.0.1:9",
+        "E2E_FAULTS": "on"
+      }
+    }
+  }
+}
