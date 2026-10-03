@@ -6,8 +6,9 @@
 3. GitHub repo secrets `CLOUDFLARE_API_TOKEN` (Workers Scripts: Edit) and `CLOUDFLARE_ACCOUNT_ID`; create the `production` environment.
 4. Worker secrets: `npx wrangler secret put CONTACT_TO` (verified inbox) and `RL_KEY_SALT` (random 32+ chars).
 5. Add custom domains to `wrangler.jsonc` (`"routes": [{ "pattern": "keygnosys.com", "custom_domain": true }]`) and a Cloudflare redirect rule `www.keygnosys.com/*` → `https://keygnosys.com/$1`. Set repo variables `SITE_URL=https://keygnosys.com` and `SITE_WWW_URL=https://www.keygnosys.com`.
-6. Preview Worker: the first trusted PR creates `keygnosys-site-preview`. **Never** set `CONTACT_TO`, `BUTTONDOWN_API_KEY` or an email binding on it. Its forms are sandboxed by design.
-7. HSTS: only after `npx tsx scripts/check-headers.ts https://keygnosys.com https://www.keygnosys.com` passes (both hostnames serve over HTTPS and www lands on the apex), set `hsts: true` in `src/config/site.ts` and deploy. The next post-deploy check then asserts HSTS on both.
+6. Once the custom domain serves the site, set `"workers_dev": false` for production (top level of `wrangler.jsonc`, not `env.preview`) and deploy, so the `*.workers.dev` URL stops serving the production Worker.
+7. Preview Worker: the first trusted PR creates `keygnosys-site-preview`. **Never** set `CONTACT_TO`, `BUTTONDOWN_API_KEY` or an email binding on it. Its forms are sandboxed by design.
+8. HSTS: only after `npx tsx scripts/check-headers.ts https://keygnosys.com https://www.keygnosys.com` passes (both hostnames serve over HTTPS and www lands on the apex), set `hsts: true` in `src/config/site.ts` and deploy. The next post-deploy check then asserts HSTS on both.
 
 ## Each feature turns on when its dependency is ready
 - Downloads: app release workflow per docs/app-release-integration.md.
