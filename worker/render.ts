@@ -13,7 +13,7 @@ export async function renderForm(assets: Fetcher, origin: string, path: string, 
   const val = (name: string | null) => (name ? state.values[name] : undefined);
   const markInvalid = (el: Element) => { if (state.errors[el.getAttribute('name') ?? '']) el.setAttribute('aria-invalid', 'true'); };
   const out = new HTMLRewriter()
-    .on('input[name]', {
+    .on('#main input[name]', {
       element(el) {
         const name = el.getAttribute('name');
         if (name === 'website' || name === 't') return;
@@ -26,15 +26,15 @@ export async function renderForm(assets: Fetcher, origin: string, path: string, 
         }
       },
     })
-    .on('textarea[name]', { element(el) { markInvalid(el); const v = val(el.getAttribute('name')); if (typeof v === 'string') el.setInnerContent(v); } })
-    .on('select[name]', { element(el) { markInvalid(el); } })
-    .on('select[name="interest"] option', {
+    .on('#main textarea[name]', { element(el) { markInvalid(el); const v = val(el.getAttribute('name')); if (typeof v === 'string') el.setInnerContent(v); } })
+    .on('#main select[name]', { element(el) { markInvalid(el); } })
+    .on('#main select[name="interest"] option', {
       element(el) { if (el.getAttribute('value') === val('interest')) el.setAttribute('selected', ''); else el.removeAttribute('selected'); },
     })
-    .on('[data-error-for]', {
+    .on('#main [data-error-for]', {
       element(el) { const msg = state.errors[el.getAttribute('data-error-for') ?? '']; if (msg) { el.setInnerContent(msg); el.removeAttribute('hidden'); } },
     })
-    .on('[data-form-banner]', {
+    .on('#main [data-form-banner]', {
       element(el) { if (state.banner && el.getAttribute('data-form-banner') === state.banner) el.removeAttribute('hidden'); },
     })
     .transform(page);
