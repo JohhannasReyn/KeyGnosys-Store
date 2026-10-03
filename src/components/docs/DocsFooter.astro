@@ -1,0 +1,11 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+import status from '../../data/content-status.json';
+const short = (status.docsCommit ?? '').slice(0, 7);
+---
+<Default {...Astro.props}><slot /></Default>
+<p class="docs-version">
+  {status.docsVersion
+    ? `These docs describe KeyGnosys ${status.docsVersion} (commit ${short}).`
+    : `Pre-release docs from main (commit ${short}).`}
+</p>

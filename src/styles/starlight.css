@@ -1,0 +1,3 @@
+/* src/styles/starlight.css */
+:root { --sl-color-accent-low: #3a2c0c; --sl-color-accent: #F2B441; --sl-color-accent-high: #ffe2a6; }
+.docs-version { font-size: .85rem; opacity: .8; margin-top: 1rem; }
