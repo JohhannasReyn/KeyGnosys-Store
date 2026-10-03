@@ -16,7 +16,7 @@ const { claims } = publishableClaims(trustClaims, r ? { commit: r.commit, versio
 <Base title="KeyGnosys" description="The shortcuts you keep meaning to learn, already on the keys. A free, open-source, app-aware keyboard overlay." bodyClass="home">
   <script slot="head" is:inline>
     try {
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(min-height: 640px) and (min-width: 768px)').matches) {
         var c = document.createElement('canvas');
         if (c.getContext('webgl2') || c.getContext('webgl')) document.documentElement.classList.add('immersive-pending');
       }

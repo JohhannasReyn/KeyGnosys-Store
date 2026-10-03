@@ -8,9 +8,11 @@ function webglAvailable(): boolean {
 }
 
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Keep in sync with the inline head script (index.astro), home.css and keyboard-scene.ts: short or narrow viewports stay flat.
+const roomy = window.matchMedia('(min-height: 640px) and (min-width: 768px)').matches;
 const htmlEl = document.documentElement;
 
-if (!reduce && webglAvailable()) {
+if (!reduce && roomy && webglAvailable()) {
   const flat = () => htmlEl.classList.remove('immersive-pending');
   const go = () => {
     // A visitor who has already started reading the flat page keeps it (only when not pre-rendered immersive).

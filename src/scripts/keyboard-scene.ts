@@ -14,6 +14,8 @@ export function start(): boolean {
   var N = PAGES.length;
   var reduce = false;
   try { reduce = matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  // Same query as home.ts and home.css: below it the page is laid out flat, so the scene must not hold input or hide content.
+  var roomy = matchMedia("(min-height: 640px) and (min-width: 768px)");
 
   /* ---------- page texture skins (canvas): card surface and accent-tinted border, no text ---------- */
   function makeTexture(page) {
@@ -173,13 +175,14 @@ export function start(): boolean {
 
   /* ---------- overlays: the current page's real content is shown (and reachable) only at rest ---------- */
   var ovs = Array.prototype.slice.call(document.querySelectorAll("#overlays .ov"));
-  var shown = null; // index of the overlay currently shown, -1 for none
+  var FLAT = -2; // viewport too small for the immersive layout: every overlay is a normal, reachable section
+  var shown = null; // index of the overlay currently shown, -1 for none, FLAT for all
   function showOverlay(idx) {
     if (idx === shown) return;
     shown = idx;
     ovs.forEach(function (ov, i) {
       ov.classList.toggle("show", i === idx);
-      if (i === idx) ov.removeAttribute("inert"); else ov.setAttribute("inert", "");
+      if (i === idx || idx === FLAT) ov.removeAttribute("inert"); else ov.setAttribute("inert", "");
     });
   }
 
@@ -192,6 +195,7 @@ export function start(): boolean {
     if (hint) hint.style.opacity = "0";
   }
   window.addEventListener("wheel", function (ev) {
+    if (!roomy.matches) return;
     ev.preventDefault();
     var dy = ev.deltaY;
     if (ev.deltaMode === 1) dy *= 16; else if (ev.deltaMode === 2) dy *= window.innerHeight;
@@ -200,11 +204,12 @@ export function start(): boolean {
   var touchY = null;
   window.addEventListener("touchstart", function (e) { if (e.touches[0]) touchY = e.touches[0].clientY; }, { passive: true });
   window.addEventListener("touchmove", function (e) {
-    if (touchY === null || !e.touches[0]) return;
+    if (touchY === null || !e.touches[0] || !roomy.matches) return;
     var dy = (touchY - e.touches[0].clientY) * 2.4; touchY = e.touches[0].clientY;
     accumulate(dy);
   }, { passive: true });
   window.addEventListener("keydown", function (e) {
+    if (!roomy.matches) return;
     if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { step(SUB); }
     else if (e.key === "ArrowUp" || e.key === "PageUp") { step(-SUB); }
   });
@@ -234,7 +239,7 @@ export function start(): boolean {
 
     var pg = lt < 0.5 ? base : Math.min(base + 1, N - 1);
     if (pg !== page) { page = pg; updateHud(); }
-    showOverlay(visGi === giTarget && visGi === cum[page] ? page : -1);
+    showOverlay(!roomy.matches ? FLAT : visGi === giTarget && visGi === cum[page] ? page : -1);
 
     var swapAt = (type === "key") ? 0.6 : 0.5;
     var wantTex = lt < swapAt ? base : Math.min(base + 1, N - 1);
