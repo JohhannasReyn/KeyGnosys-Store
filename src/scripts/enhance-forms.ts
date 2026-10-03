@@ -33,7 +33,7 @@ for (const form of document.querySelectorAll<HTMLFormElement>('form[data-enhance
       const body = (await res.json()) as JsonResult;
       if (body.redirect) { window.location.assign(body.redirect); return; } // keep button disabled: no double submit
       if (body.errors) showErrors(form, body.errors);
-      else if (body.error === 'rate_limited') { window.location.assign('/errors/rate-limited/'); return; }
+      else if (body.error === 'rate_limited') showBanner(form, 'rate_limited'); // stay put: values are kept
       else showBanner(form, 'send_failed');
     } catch {
       showBanner(form, 'network');

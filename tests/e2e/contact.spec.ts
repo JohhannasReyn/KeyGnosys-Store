@@ -45,6 +45,21 @@ test.describe('with JavaScript', () => {
     expect(await outbox(request)).toEqual([]);
   });
 
+  test('rate limiting shows a banner in place and keeps the message', async ({ browser, request }) => {
+    const ctx = await browser.newContext({ extraHTTPHeaders: { 'x-e2e-rate-limit': 'block' } });
+    const page = await ctx.newPage();
+    await page.goto('/teams/');
+    await fillContact(page, { message: 'Please keep this text safe.' });
+    await ageForms(page);
+    await page.getByRole('button', { name: 'Send message' }).click();
+    await expect(page.locator('#contact-form [data-form-banner="rate_limited"]')).toBeVisible();
+    expect(new URL(page.url()).pathname).toBe('/teams/');
+    await expect(page.locator('#cf-message')).toHaveValue('Please keep this text safe.');
+    await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled();
+    expect(await outbox(request)).toEqual([]);
+    await ctx.close();
+  });
+
   test('newsletter opt-in subscribes after sending', async ({ page, request }) => {
     await page.goto('/teams/');
     await fillContact(page, { newsletter: true });
