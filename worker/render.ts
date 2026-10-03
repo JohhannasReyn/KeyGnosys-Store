@@ -1,15 +1,21 @@
 import type { FormState } from './deps';
 
 const HTML = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' };
+/** Served when the static page itself cannot be loaded; keeps the caller's status. */
+const FALLBACK = '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>KeyGnosys</title></head>'
+  + '<body><p>Something went wrong — email hello@keygnosys.com</p></body></html>';
+const fallback = (status: number) => new Response(FALLBACK, { status, headers: HTML });
 
 export async function renderPage(assets: Fetcher, origin: string, path: string, status: number): Promise<Response> {
   const page = await assets.fetch(new Request(new URL(path, origin)));
+  if (!page.ok) return fallback(status);
   return new Response(page.body, { status, headers: HTML });
 }
 
 /** Re-renders a static form page with the visitor's values and errors. All values go through setAttribute/setInnerContent (escaped). */
 export async function renderForm(assets: Fetcher, origin: string, path: string, state: FormState, status: number): Promise<Response> {
   const page = await assets.fetch(new Request(new URL(path, origin)));
+  if (!page.ok) return fallback(status);
   const val = (name: string | null) => (name ? state.values[name] : undefined);
   const markInvalid = (el: Element) => { if (state.errors[el.getAttribute('name') ?? '']) el.setAttribute('aria-invalid', 'true'); };
   const out = new HTMLRewriter()
