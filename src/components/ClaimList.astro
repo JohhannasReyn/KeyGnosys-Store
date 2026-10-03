@@ -1,0 +1,17 @@
+---
+import type { PublishedClaim } from '../lib/trust';
+interface Props { claims: PublishedClaim[]; compact?: boolean }
+const { claims, compact = false } = Astro.props;
+---
+<ul class="claims grid">
+  {claims.map((c) => (
+    <li class="card" id={`claim-${c.id}`}>
+      <h3>{c.title}</h3>
+      <p>{c.detail}</p>
+      {c.prerelease && <p class="badge">Evidence from unreleased source</p>}
+      {compact
+        ? <a href={`/trust/#claim-${c.id}`}>See the evidence →</a>
+        : <ul class="evidence">{c.links.map((l) => <li><a href={l.url} rel="noopener">{l.label} ↗</a></li>)}</ul>}
+    </li>
+  ))}
+</ul>
